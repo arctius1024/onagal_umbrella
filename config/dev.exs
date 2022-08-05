@@ -26,6 +26,8 @@ config :onagal_web, OnagalWeb.Endpoint,
     cipher_suite: :strong,
     certfile: "priv/cert/selfsigned.pem",
     keyfile: "priv/cert/selfsigned_key.pem"
+#    verify: :verify_peer,
+#    verify_fun: {&verify_fun_selfsigned_cert/3, []})
   ],
   check_origin: false,
   code_reloader: true,
