@@ -10,6 +10,8 @@ defmodule OnagalWeb.Application do
     children = [
       # Start the Telemetry supervisor
       OnagalWeb.Telemetry,
+      # PubSub
+      {Phoenix.PubSub, name: Onagal.PubSub},
       # Start the Endpoint (http/https)
       OnagalWeb.Endpoint
       # Start a worker by calling: OnagalWeb.Worker.start_link(arg)

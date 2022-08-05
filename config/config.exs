@@ -57,3 +57,7 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
+
+config :onagal_fs, Onagal.Fs,
+  watch_dir: System.get_env("WATCH_DIR"),
+  manage_dir: System.get_env("MANAGE_DIR")
