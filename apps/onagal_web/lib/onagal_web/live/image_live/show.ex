@@ -3,6 +3,9 @@ defmodule OnagalWeb.ImageLive.Show do
 
   alias Onagal.Images
 
+  @managed_path System.get_env("MANAGE_DIR")
+  @managed_web_path "/managed_images"
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -18,8 +21,8 @@ defmodule OnagalWeb.ImageLive.Show do
   end
 
   defp get_image_path(%Images.Image{} = image) do
-    # FIX: original path and /managed_images should be configured
-    Regex.replace(~r/^\/home\/ssawyer\/manage/, Images.full_image_path(image), "/managed_images")
+    # FIX: handle these paths in a better way
+    Regex.replace(~r/^#{@managed_path}/, Images.full_image_path(image), @managed_web_path)
   end
 
   defp get_image_path(_), do: "/images/phoenix.png"
