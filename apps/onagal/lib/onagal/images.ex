@@ -5,7 +5,7 @@ defmodule Onagal.Images do
 
   alias Onagal.Repo
   alias Onagal.Images.Image
-  
+
   import Ecto.Query
 
   def list_images do
@@ -29,6 +29,8 @@ defmodule Onagal.Images do
     Repo.get_by(Image, location: path, current_name: name)
   end
 
+  def create_image(attrs \\ %{}), do: add_image(attrs)
+
   def add_image(attrs \\ %{}) do
     %Image{}
     |> Image.changeset(attrs)
@@ -38,14 +40,32 @@ defmodule Onagal.Images do
       {:ok, image} ->
         {:ok, image}
 
-      {:error, _} ->
+      # If image already exists AND that is the _only_ error, find the existing image
+      # and return that instead of creating
+      {:error,
+       %Ecto.Changeset{
+         action: _,
+         changes: _,
+         errors: [current_name: {_, [constraint: :unique, constraint_name: _]}],
+         data: _,
+         valid?: false
+       }} ->
         {:error,
-         Repo.get_by!(Onagal.Image,
+         Repo.get_by!(Onagal.Images.Image,
            current_name: attrs.current_name,
            location: attrs.location
          )}
+
+      # All other errors (including existing+another error)
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
+
+  # defp image_exists?({:image, {_, [constraint: :unique, constraint_name: _]}}), do: true
+  # defp image_exists?(_), do: false
+
+  def change_image(%Image{} = image, attrs), do: update_image(image, attrs)
 
   def update_image(%Image{} = image, attrs) do
     image
