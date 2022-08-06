@@ -81,6 +81,17 @@ defmodule OnagalWeb.Router do
   end
 
   scope "/", OnagalWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live "/images", ImageLive.Index, :index
+    live "/images/new", ImageLive.Index, :new
+    live "/images/:id/edit", ImageLive.Index, :edit
+
+    live "/images/:id", ImageLive.Show, :show
+    live "/images/:id/show/edit", ImageLive.Show, :edit
+  end
+
+  scope "/", OnagalWeb do
     pipe_through [:browser]
 
     delete "/users/log_out", UserSessionController, :delete

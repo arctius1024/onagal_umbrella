@@ -94,4 +94,8 @@ defmodule Onagal.Images do
   def match_image(size, digest) do
     Repo.get_by(Image, size: size, digest: digest)
   end
+
+  def full_image_path(image) do
+    Path.join(image.location, image.current_name)
+  end
 end
