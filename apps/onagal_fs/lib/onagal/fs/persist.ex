@@ -86,7 +86,7 @@ defmodule Onagal.Fs.Persist do
       digest: compute_digest(path)
     }
 
-    case Onagal.add_image(image_data) do
+    case Onagal.Images.add_image(image_data) do
       {:ok, _} -> {:ok, :persisted}
       {:error, _} -> {:error, :not_persisted}
     end
@@ -98,9 +98,9 @@ defmodule Onagal.Fs.Persist do
     fpath = Path.dirname(path)
     file = Path.basename(path)
 
-    image = Onagal.get_image_by_file_path(fpath, file)
+    image = Onagal.Images.get_image_by_file_path(fpath, file)
 
-    case Onagal.delete_image(image) do
+    case Onagal.Images.delete_image(image) do
       {:ok, _} -> {:ok, :file_deleted}
       {:error, _} -> {:error, :file_delete_failed}
     end
