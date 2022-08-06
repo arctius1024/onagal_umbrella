@@ -1,4 +1,4 @@
-defmodule Onagal.Tagset do
+defmodule Onagal.Tags.Tagset do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -10,7 +10,7 @@ defmodule Onagal.Tagset do
 
     ## TODO: on_replace may be wrong
     # , on_replace: :delete
-    many_to_many(:tags, Onagal.Tag, join_through: "tags_tagsets")
+    many_to_many(:tags, Onagal.Tags.Tag, join_through: "tags_tagsets")
   end
 
   @valid_params ~w(name description)a

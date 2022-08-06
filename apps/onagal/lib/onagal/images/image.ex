@@ -1,4 +1,4 @@
-defmodule Onagal.Image do
+defmodule Onagal.Images.Image do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -14,7 +14,7 @@ defmodule Onagal.Image do
 
     ## TODO: on_replace may be wrong
     # , on_replace: :delete
-    many_to_many(:tags, Onagal.Tag, join_through: "images_tags")
+    many_to_many(:tags, Onagal.Tags.Tag, join_through: "images_tags")
   end
 
   @required_fields ~w(current_name original_name location)a
