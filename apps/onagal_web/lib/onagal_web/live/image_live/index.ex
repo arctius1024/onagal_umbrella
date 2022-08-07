@@ -35,12 +35,20 @@ defmodule OnagalWeb.ImageLive.Index do
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     image = Images.get_image!(id)
-    {:ok, _} = Images.delete_image(image)
+    # {:ok, _} = Images.delete_image(image)
+    {:ok, _} = Onagal.Fs.cleanup_file(Images.full_image_path(image))
 
     {:noreply, assign(socket, :images, list_images())}
   end
 
   defp list_images do
     Images.list_images()
+  end
+
+  defp resolve_thumbnail_path(image) do
+    if !File.exists?(Images.system_thumbnail_image_path(image)),
+      do: Images.generate_thumbnail(image)
+
+    Images.web_thumbnail_image_path(image)
   end
 end
