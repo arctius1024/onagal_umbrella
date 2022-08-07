@@ -20,6 +20,10 @@ defmodule Onagal.Tags do
     |> Repo.insert()
   end
 
+  def change_tag(%Tag{} = tag, attrs \\ %{}) do
+    Tag.changeset(tag, attrs)
+  end
+
   def update_tag(%Tag{} = tag, attrs) do
     tag
     |> Tag.changeset(attrs)
@@ -75,6 +79,10 @@ defmodule Onagal.Tags do
     |> Repo.insert()
   end
 
+  def change_tagset(%Tagset{} = tagset, attrs \\ %{}) do
+    Tagset.changeset(tagset, attrs)
+  end
+
   def update_tagset(%Tagset{} = tagset, attrs) do
     tagset
     |> Tagset.changeset(attrs)
@@ -111,6 +119,10 @@ defmodule Onagal.Tags do
     |> Repo.insert()
   end
 
+  def change_gallery(%Gallery{} = gallery, attrs \\ %{}) do
+    Gallery.changeset(gallery, attrs)
+  end
+
   def update_gallery(%Gallery{} = gallery, attrs) do
     gallery
     |> Gallery.changeset(attrs)
@@ -132,5 +144,4 @@ defmodule Onagal.Tags do
   def get_gallery_tags(gallery) do
     Repo.all(Ecto.assoc(gallery, :tags))
   end
-
 end

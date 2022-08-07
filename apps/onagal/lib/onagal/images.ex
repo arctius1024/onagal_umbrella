@@ -8,6 +8,12 @@ defmodule Onagal.Images do
 
   import Ecto.Query
 
+  @managed_path System.get_env("MANAGE_DIR")
+  @managed_thumb_path System.get_env("THUMB_DIR")
+
+  @managed_web_path "/managed_images"
+  @managed_web_thumb_path "/thumbs"
+
   def list_images do
     Image |> Repo.all()
   end
@@ -65,7 +71,9 @@ defmodule Onagal.Images do
   # defp image_exists?({:image, {_, [constraint: :unique, constraint_name: _]}}), do: true
   # defp image_exists?(_), do: false
 
-  def change_image(%Image{} = image, attrs), do: update_image(image, attrs)
+  def change_image(%Image{} = image, attrs \\ %{}) do
+    Image.changeset(image, attrs)
+  end
 
   def update_image(%Image{} = image, attrs) do
     image
@@ -98,4 +106,43 @@ defmodule Onagal.Images do
   def full_image_path(image) do
     Path.join(image.location, image.current_name)
   end
+
+  def generate_thumbnail(image) do
+    Thumbnex.create_thumbnail(
+      full_image_path(image),
+      system_thumbnail_image_path(image),
+      max_width: 160,
+      max_height: 160
+    )
+  end
+
+  @doc """
+    Given an image - return the web path for it
+  """
+  def web_image_path(%Image{} = image) do
+    # FIX: handle these paths in a better way
+    Regex.replace(~r/^#{@managed_path}/, full_image_path(image), @managed_web_path)
+  end
+
+  def web_image_path(_), do: "/images/invalid.png"
+
+  @doc """
+    Given an image - return the system path for it's thumbnail
+  """
+  def system_thumbnail_image_path(%Image{} = image) do
+    thumb_path = ""
+    Regex.replace(~r/^#{@managed_path}/, full_image_path(image), @managed_thumb_path)
+  end
+
+  def system_thumbnail_image_path(_), do: "/images/invalid.png"
+
+  @doc """
+    Given an image - return the web path for it's thumbnail
+  """
+  def web_thumbnail_image_path(%Image{} = image) do
+    thumb_path = ""
+    Regex.replace(~r/^#{@managed_path}/, full_image_path(image), @managed_web_thumb_path)
+  end
+
+  def web_thumbnail_image_path(image), do: "/images/invalid.png"
 end

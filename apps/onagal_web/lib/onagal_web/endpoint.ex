@@ -27,6 +27,11 @@ defmodule OnagalWeb.Endpoint do
     from: "/home/ssawyer/manage/",
     gzip: false
 
+  plug Plug.Static,
+    at: "/thumbs",
+    from: "/home/ssawyer/thumbs/",
+    gzip: false
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do

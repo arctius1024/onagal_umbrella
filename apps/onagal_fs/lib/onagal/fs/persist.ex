@@ -75,7 +75,7 @@ defmodule Onagal.Fs.Persist do
 
   defp persist_file_info({path, file_stat} = fileinfo) when is_tuple(fileinfo) do
     fpath = Path.dirname(path)
-    file = Path.basename(path)
+    file = String.downcase(Path.basename(path))
 
     image_data = %{
       original_name: file,
@@ -96,7 +96,7 @@ defmodule Onagal.Fs.Persist do
 
   defp remove_file_info({path, _} = fileinfo) when is_tuple(fileinfo) do
     fpath = Path.dirname(path)
-    file = Path.basename(path)
+    file = String.downcase(Path.basename(path))
 
     image = Onagal.Images.get_image_by_file_path(fpath, file)
 
@@ -109,7 +109,7 @@ defmodule Onagal.Fs.Persist do
   defp remove_file_info(_), do: {:error, :invalid_file}
 
   defp simple_type_lookup(filename) when is_binary(filename) do
-    if image_type = @image_types[Path.extname(filename)] do
+    if image_type = @image_types[String.downcase(Path.extname(filename))] do
       image_type
     else
       "application/octet-stream"
