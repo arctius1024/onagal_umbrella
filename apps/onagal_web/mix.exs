@@ -24,7 +24,7 @@ defmodule OnagalWeb.MixProject do
   def application do
     [
       mod: {OnagalWeb.Application, []},
-      extra_applications: [:logger, :runtime_tools, :os_mon]
+      extra_applications: [:logger, :runtime_tools, :os_mon, :onagal_fs]
     ]
   end
 
@@ -48,6 +48,7 @@ defmodule OnagalWeb.MixProject do
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
+      {:onagal, in_umbrella: true},
       {:onagal, in_umbrella: true},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"}

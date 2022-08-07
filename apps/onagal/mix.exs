@@ -23,7 +23,7 @@ defmodule Onagal.MixProject do
   def application do
     [
       mod: {Onagal.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :thumbnex]
     ]
   end
 
@@ -40,6 +40,7 @@ defmodule Onagal.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
+      {:thumbnex, "~> 0.4.0"},
       {:jason, "~> 1.2"},
       {:swoosh, "~> 1.3"}
     ]

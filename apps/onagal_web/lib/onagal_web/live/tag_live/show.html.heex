@@ -14,7 +14,10 @@
 <% end %>
 
 <ul>
-
+  <li>
+    <strong>Name:</strong>
+    <%= @tag.name %>
+  </li>
 </ul>
 
 <span><%= live_patch "Edit", to: Routes.tag_show_path(@socket, :edit, @tag), class: "button" %></span> |
