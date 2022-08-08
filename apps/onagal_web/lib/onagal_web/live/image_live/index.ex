@@ -5,8 +5,11 @@ defmodule OnagalWeb.ImageLive.Index do
   alias Onagal.Images.Image
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, :images, list_images())}
+  def mount(params, _session, socket) do
+    # page = list_images(params)
+    # {:ok, assign(socket, :images, list_images())}
+    # {:ok, assign(socket, :page, page)}
+    {:ok, socket}
   end
 
   @impl true
@@ -26,10 +29,11 @@ defmodule OnagalWeb.ImageLive.Index do
   #   |> assign(:image, %Image{})
   # end
 
-  defp apply_action(socket, :index, _params) do
+  defp apply_action(socket, :index, params) do
     socket
     |> assign(:page_title, "Listing Images")
     |> assign(:image, nil)
+    |> assign(:page, list_images(params))
   end
 
   @impl true
@@ -38,11 +42,12 @@ defmodule OnagalWeb.ImageLive.Index do
     # {:ok, _} = Images.delete_image(image)
     {:ok, _} = Onagal.Fs.cleanup_file(Images.full_image_path(image))
 
-    {:noreply, assign(socket, :images, list_images())}
+    {:noreply, assign(socket, :images, list_images({}))}
   end
 
-  defp list_images do
-    Images.list_images()
+  defp list_images(params) do
+    # Images.list_images()
+    page = Images.paginate_images(params)
   end
 
   defp resolve_thumbnail_path(image) do

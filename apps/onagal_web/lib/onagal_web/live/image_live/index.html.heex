@@ -19,24 +19,16 @@
       <th>Preview</th>
       <th>Original Name</th>
       <th>Size</th>
-      <th>Digest</th>
-      <th>File Type</th>
-      <th>Inserted At</th>
-      <th>Updated At</th>
     </tr>
   </thead>
   <tbody id="images">
-    <%= for image <- @images do %>
-      <tr id={"image-#{image.id}"}>
+    <%= for image <- @page.entries do %>
+      <tr style="max-width: 160px; overflow: hidden; " id={"image-#{image.id}"}>
         <td><%= live_redirect to: Routes.image_show_path(@socket, :show, image) do %>
           <img src={resolve_thumbnail_path(image)}>
         <% end %></td>
-        <td style="max-width: 150px; word-wrap: break-all; overflow: hidden;"><%= image.original_name %></td>
-        <td style="max-width: 150px; word-wrap: break-all; overflow: hidden;"><%= image.size %></td>
-        <td style="max-width: 150px; word-wrap: break-all; overflow: hidden;"><%= image.digest %></td>
-        <td style="max-width: 150px; word-wrap: break-all; overflow: hidden;"><%= image.file_type %></td>
-        <td style="max-width: 150px; word-wrap: break-all; overflow: hidden;"><%= image.inserted_at %></td>
-        <td style="max-width: 150px; word-wrap: break-all; overflow: hidden;"><%= image.updated_at %></td>
+        <td style="max-width: 100px; word-wrap: break-all; text-overflow: ellipsis; overflow: hidden;"><%= image.original_name %></td>
+        <td style="max-width: 80px; word-wrap: break-all; text-overflow: ellipsis; overflow: hidden;"><%= image.size %></td>
 
         <td>
           <span><%= live_redirect "Show", to: Routes.image_show_path(@socket, :show, image) %></span>
@@ -47,3 +39,17 @@
     <% end %>
   </tbody>
 </table>
+
+<div class="pagination">
+  <%= if @page.page_number > 1 do %>
+    <%= live_patch "<< Prev Page",
+        to: Routes.image_index_path(@socket, :index, page: @page.page_number - 1),
+        class: "pagination-link" %>
+  <% end %>
+
+  <%= if @page.page_number < @page.total_pages do %>
+    <%= live_patch "Next Page >>",
+        to: Routes.image_index_path(@socket, :index, page: @page.page_number + 1),
+        class: "pagination-link" %>
+  <% end %>
+</div>

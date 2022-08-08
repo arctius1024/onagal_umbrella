@@ -18,6 +18,10 @@ defmodule Onagal.Images do
     Image |> Repo.all()
   end
 
+  def paginate_images(params) do
+    Repo.paginate(Image, params)
+  end
+
   def images_summary do
     from(t in Image, select: {t.current_path, t.location})
     |> Repo.all()
