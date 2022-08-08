@@ -11,10 +11,20 @@
   </head>
   <body>
     <header>
-      <nav>
-        <%= render "_user_menu.html", assigns %>
-      </nav>
+      <section class="container">
+        <nav>
+          <%= render "_user_menu.html", assigns %>
+        </nav>
+      </section>
     </header>
+    <section class="container">
+      <ul>
+        <li><%= link "Images", to: Routes.image_index_path(@conn, :index) %></li>
+        <li><%= link "Tags", to: Routes.tag_index_path(@conn, :index) %></li>
+        <li><%= link "Tagsets", to: Routes.tagset_index_path(@conn, :index) %></li>
+        <li><%= link "Galleries", to: Routes.gallery_index_path(@conn, :index) %></li>
+      </ul>
+    </section>
     <%= @inner_content %>
   </body>
 </html>

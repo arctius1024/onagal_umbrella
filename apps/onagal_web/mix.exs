@@ -49,7 +49,7 @@ defmodule OnagalWeb.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
       {:onagal, in_umbrella: true},
-      {:onagal, in_umbrella: true},
+      {:onagal_fs, in_umbrella: true},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"}
     ]

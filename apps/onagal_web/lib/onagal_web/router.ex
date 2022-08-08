@@ -94,7 +94,7 @@ defmodule OnagalWeb.Router do
     pipe_through([:browser, :require_authenticated_user])
 
     live("/", ImageLive.Index, :index)
-    live("/new", ImageLive.Index, :new)
+    # live("/new", ImageLive.Index, :new)
     live("/:id/edit", ImageLive.Index, :edit)
 
     live("/:id", ImageLive.Show, :show)

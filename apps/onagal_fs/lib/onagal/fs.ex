@@ -54,7 +54,7 @@ defmodule Onagal.Fs do
   def cleanup_file(fpath) when is_binary(fpath) do
     IO.puts("handling file removed event for #{fpath}")
 
-    with {:ok, _} <- Onagal.Fs.Persist.remove_files_info([{fpath, nil}]),
+    with {:ok, _} <- Onagal.Fs.Persist.remove_files_info([{fpath, nil, nil}]),
          {:ok, _} <- Onagal.Fs.Manage.remove_managed_file(fpath) do
       IO.puts("file #{fpath} removed")
       {:ok, :file_removed}
@@ -71,7 +71,7 @@ defmodule Onagal.Fs do
     with true <- Onagal.Fs.Persist.is_image?(fpath),
          {:ok, fstat} <- File.stat(fpath),
          {:ok, new_path} <- Onagal.Fs.Manage.migrate_managed_file(fpath),
-         {:ok, _} <- Onagal.Fs.Persist.persist_files_info([{new_path, fstat}]) do
+         {:ok, _} <- Onagal.Fs.Persist.persist_files_info([{new_path, fpath, fstat}]) do
       IO.puts("file_added(#{fpath}) / #{new_path}")
       {:ok, :file_added}
     else

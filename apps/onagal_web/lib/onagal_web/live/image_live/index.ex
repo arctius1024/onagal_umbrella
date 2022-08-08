@@ -20,11 +20,11 @@ defmodule OnagalWeb.ImageLive.Index do
     |> assign(:image, Images.get_image!(id))
   end
 
-  defp apply_action(socket, :new, _params) do
-    socket
-    |> assign(:page_title, "New Image")
-    |> assign(:image, %Image{})
-  end
+  # defp apply_action(socket, :new, _params) do
+  #   socket
+  #   |> assign(:page_title, "New Image")
+  #   |> assign(:image, %Image{})
+  # end
 
   defp apply_action(socket, :index, _params) do
     socket

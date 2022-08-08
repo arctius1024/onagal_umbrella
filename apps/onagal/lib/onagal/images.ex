@@ -75,6 +75,10 @@ defmodule Onagal.Images do
     Image.changeset(image, attrs)
   end
 
+  def ui_change_image(%Image{} = image, attrs \\ %{}) do
+    Image.ui_edit_changeset(image, attrs)
+  end
+
   def update_image(%Image{} = image, attrs) do
     image
     |> Image.changeset(attrs)
