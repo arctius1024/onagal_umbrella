@@ -56,7 +56,7 @@ defmodule Onagal.Fs.Persist do
   def filter_non_images(file_list) when is_list(file_list) do
     image_files =
       file_list
-      |> Enum.filter(fn {fpath, _} -> is_image?(fpath) end)
+      |> Enum.filter(fn {fpath, _, _} -> is_image?(fpath) end)
 
     image_files
   end
@@ -73,12 +73,13 @@ defmodule Onagal.Fs.Persist do
 
   def is_image?(_), do: false
 
-  defp persist_file_info({path, file_stat} = fileinfo) when is_tuple(fileinfo) do
+  defp persist_file_info({path, old_path, file_stat} = fileinfo) when is_tuple(fileinfo) do
     fpath = Path.dirname(path)
     file = String.downcase(Path.basename(path))
+    old_name = Path.basename(old_path)
 
     image_data = %{
-      original_name: file,
+      original_name: old_name,
       current_name: file,
       location: fpath,
       size: file_stat.size,
@@ -94,7 +95,7 @@ defmodule Onagal.Fs.Persist do
 
   defp persist_file_info(_), do: {:error, :invalid_file_data}
 
-  defp remove_file_info({path, _} = fileinfo) when is_tuple(fileinfo) do
+  defp remove_file_info({path, _, _} = fileinfo) when is_tuple(fileinfo) do
     fpath = Path.dirname(path)
     file = String.downcase(Path.basename(path))
 
