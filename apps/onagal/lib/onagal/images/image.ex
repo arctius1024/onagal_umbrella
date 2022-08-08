@@ -19,6 +19,7 @@ defmodule Onagal.Images.Image do
 
   @required_fields ~w(current_name original_name location)a
   @optional_fields ~w(digest size file_type)a
+  @ui_edit_fields ~w(original_name)a
   # @allowed_file_types
 
   def changeset(record, params \\ :empty) do
@@ -27,5 +28,11 @@ defmodule Onagal.Images.Image do
     |> unique_constraint([:current_name, :location])
     |> unique_constraint([:size, :digest])
     |> validate_required(@required_fields)
+  end
+
+  def ui_edit_changeset(record, params \\ :empty) do
+    record
+    |> cast(params, @ui_edit_fields)
+    |> validate_required(@ui_edit_fields)
   end
 end

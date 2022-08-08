@@ -17,7 +17,7 @@ defmodule OnagalWeb.ImageLive.FormComponent do
   def handle_event("validate", %{"image" => image_params}, socket) do
     changeset =
       socket.assigns.image
-      |> Images.change_image(image_params)
+      |> Images.ui_change_image(image_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :changeset, changeset)}
