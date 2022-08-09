@@ -15,16 +15,28 @@
         <nav>
           <%= render "_user_menu.html", assigns %>
         </nav>
+        <nav>
+          <table>
+            <tr>
+              <td><%= link "Images", to: Routes.image_index_path(@conn, :index) %></td>
+              <td><%= link "Tags", to: Routes.tag_index_path(@conn, :index) %></td>
+              <td><%= link "Tagsets", to: Routes.tagset_index_path(@conn, :index) %></td>
+              <td><%= link "Galleries", to: Routes.gallery_index_path(@conn, :index) %></td>
+            </tr>
+          </table>
+        </nav>
       </section>
     </header>
-    <section class="container">
-      <ul>
-        <li><%= link "Images", to: Routes.image_index_path(@conn, :index) %></li>
-        <li><%= link "Tags", to: Routes.tag_index_path(@conn, :index) %></li>
-        <li><%= link "Tagsets", to: Routes.tagset_index_path(@conn, :index) %></li>
-        <li><%= link "Galleries", to: Routes.gallery_index_path(@conn, :index) %></li>
-      </ul>
-    </section>
-    <%= @inner_content %>
+    <div class="flex-container" style="display: flex;">
+      <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
+        <ul style="list-style-type: none; margin: 1; padding: 1;">
+          <li><%= link "Tags", to: Routes.tag_index_path(@conn, :index) %></li>
+          <li><%= link "Tagsets", to: Routes.tagset_index_path(@conn, :index) %></li>
+        </ul>
+      </div>
+      <div class="flex-child" style="flex: 1;">
+        <%= @inner_content %>
+      </div>
+    </div>
   </body>
 </html>
