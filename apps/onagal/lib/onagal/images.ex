@@ -29,6 +29,44 @@ defmodule Onagal.Images do
 
   def get_image!(id), do: Repo.get!(Image, id)
 
+  def get_prev_image(id) do
+    query =
+      from i in Image,
+        where: i.id < ^id,
+        order_by: [desc: i.id],
+        limit: 1
+
+    Repo.one(query) || get_last_image()
+  end
+
+  def get_next_image(id) do
+    query =
+      from i in Image,
+        where: i.id > ^id,
+        order_by: i.id,
+        limit: 1
+
+    Repo.one(query) || get_first_image()
+  end
+
+  def get_first_image() do
+    query =
+      from i in Image,
+        order_by: i.id,
+        limit: 1
+
+    Repo.one(query)
+  end
+
+  def get_last_image() do
+    query =
+      from i in Image,
+        order_by: [desc: i.id],
+        limit: 1
+
+    Repo.one(query)
+  end
+
   def get_image_by_file_path(path, name) do
     # query =
     #   from(i in Image,

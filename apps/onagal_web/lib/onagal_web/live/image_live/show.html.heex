@@ -14,7 +14,9 @@
 <% end %>
 
 <ul>
+  <span><%= live_patch "Prev", to: Routes.image_show_path(@socket, :show, @prev_image) %></span>
   <img src={@image_path}>
+  <span><%= live_patch "Next", to: Routes.image_show_path(@socket, :show, @next_image) %></span>
 </ul>
 
 <span><%= live_patch "Edit", to: Routes.image_show_path(@socket, :edit, @image), class: "button" %></span> |
