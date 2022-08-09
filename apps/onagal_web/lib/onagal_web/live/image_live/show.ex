@@ -16,6 +16,8 @@ defmodule OnagalWeb.ImageLive.Show do
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
      |> assign(:image, image)
+     |> assign(:next_image, Images.get_next_image(image.id))
+     |> assign(:prev_image, Images.get_prev_image(image.id))
      |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))}
   end
 
