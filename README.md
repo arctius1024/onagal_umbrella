@@ -15,7 +15,7 @@ moving relevant files into the "import" directory. !!~~
 
 - [60%] Upload import system (WIP). An elixir process will use inotify filesystem events to
 watch an upload directory for new files. If the file is an image it will be moved into a groomed storage area, its
-meta-data stored into the data store and be available via the web ui. Files can be placed via web ui or directly via the filesystem.
+meta-data stored into the data store and be available via the web ui. Files ~~can be placed via web ui or~~ directly via the filesystem.
 
 - [75%] Data-store is a PostgreSQL database, along with an ecto interface to the data.
 
