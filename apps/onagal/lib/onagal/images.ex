@@ -18,6 +18,21 @@ defmodule Onagal.Images do
     Image |> Repo.all()
   end
 
+  @doc """
+    params: used for skrivener
+    tags: list of tags to return paginated image list
+  """
+  def paginate_images_with_tags(params, tags) do
+    # page =
+    #   from(image in Image,
+    #     preload: [:tags],
+    #     join: tag in assoc(image, :tags),
+    #     on: tag.name in ^tags,
+    #     group_by: image.id
+    #   )
+    images_matching_tag_list(params, tags)
+  end
+
   def paginate_images(params) do
     Repo.paginate(Image, params)
   end
@@ -176,7 +191,6 @@ defmodule Onagal.Images do
     Given an image - return the system path for it's thumbnail
   """
   def system_thumbnail_image_path(%Image{} = image) do
-    thumb_path = ""
     Regex.replace(~r/^#{@managed_path}/, full_image_path(image), @managed_thumb_path)
   end
 
@@ -186,9 +200,46 @@ defmodule Onagal.Images do
     Given an image - return the web path for it's thumbnail
   """
   def web_thumbnail_image_path(%Image{} = image) do
-    thumb_path = ""
     Regex.replace(~r/^#{@managed_path}/, full_image_path(image), @managed_web_thumb_path)
   end
 
-  def web_thumbnail_image_path(image), do: "/images/invalid.png"
+  def web_thumbnail_image_path(_), do: "/images/invalid.png"
+
+  @doc """
+    params: used for skrivener
+    tags: list of tags to return paginated image list
+  """
+  def images_matching_tag_list(_, []), do: []
+
+  def images_matching_tag_list(params, tag_name_list) when is_list(tag_name_list) do
+    image_ids = image_ids_matching_tags(tag_name_list)
+
+    query =
+      from(image in Image,
+        where: image.id in ^image_ids,
+        preload: [:tags],
+        join: tag in assoc(image, :tags),
+        group_by: image.id
+      )
+
+    Repo.paginate(query, params)
+  end
+
+  def images_matching_tag_list(_, _), do: []
+
+  @doc """
+    given a list of tags, return a list of image ids that are associated with ALL
+    the tags in the list (not just any/one/some)
+    tags: list of tags
+  """
+  defp image_ids_matching_tags(tag_name_list) do
+    sql_safe_tag_name_list = "'" <> Enum.join(tag_name_list, "','") <> "'"
+
+    {:ok, %Postgrex.Result{rows: rows} = _} =
+      Onagal.Repo.query(
+        "SELECT * FROM images_with_all_tag_names(array[#{sql_safe_tag_name_list}]);"
+      )
+
+    Enum.flat_map(rows, fn v -> v end)
+  end
 end

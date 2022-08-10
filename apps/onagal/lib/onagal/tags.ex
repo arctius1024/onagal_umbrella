@@ -12,6 +12,12 @@ defmodule Onagal.Tags do
     Repo.all(Tag)
   end
 
+  def list_tags_as_options do
+    Enum.map(Repo.all(Tag), fn tag ->
+      {String.to_atom(tag.name), tag.name}
+    end)
+  end
+
   def get_tag!(id), do: Repo.get!(Tag, id)
 
   def create_tag(attrs \\ %{}) do

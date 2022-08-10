@@ -2,27 +2,27 @@
 
 ## Purpose
 
-A basic image management system consisting of several parts.
+A basic image management system consisting of several parts:
 
-- [5%] Web front-end (entirely unwritten but planned) allow images with static tags (and possibly KV tags in the future) and
+- onagal: [75%] Data-store is a PostgreSQL database, along with an ecto interface to the data. Other utility modules may go here 
+as well.
+
+- onagal_web: [15%] Web front-end (early rough-out) allow images with static tags (and possibly KV tags in the future) and
 a matching "gallery" system allow groups of tags to be saved into a "gallery" as preset filters for slide show presentations.
 
-- ~~[75%] Bulk import system (WIP - refactor). Pass it a top level directory and it will recurse, find all
+- onagal_fs: [80%] Filesystem importer (WIP). An elixir process that uses inotify filesystem events to watch 
+an upload directory for new files. If the file is an image it will be moved into a groomed storage area, its
+meta-data stored into the data store and be available via the web ui. Also handles file removal/cleanup. 
+
+- ~~onagal_crawl: [75%] Bulk import system (WIP - refactor). Pass it a top level directory and it will recurse, find all
 files with an image file type (only looks at extension, may improve that later) and store basic meta-data into a data store.
 The file will then be moved into a groomed storage area and then be available via the web ui. This is likely to only be used once,
 as any future image imports would be done via the upload importer. !! This may be replaced by utilizing the auto importer and 
-moving relevant files into the "import" directory. !!~~
-
-- [60%] Upload import system (WIP). An elixir process will use inotify filesystem events to
-watch an upload directory for new files. If the file is an image it will be moved into a groomed storage area, its
-meta-data stored into the data store and be available via the web ui. Files ~~can be placed via web ui or~~ directly via the filesystem.
-
-- [75%] Data-store is a PostgreSQL database, along with an ecto interface to the data.
+moving relevant files into the "import" directory. !!~~  Removed, some functionality merged with onagal_fs.
 
 - Future phases may include KV tags (rather than static keyword tags), date range filtering, EXIM meta-data extraction/tagging,
 basic reporting capabilities, random slideshows, ability to embed a gallery on another page via an embed code. Who knows,
 all exciting stuff.
-
 
 ## Background
 
@@ -35,9 +35,9 @@ time on, nor am I terribly familiar with most of the technologies involved. It m
 be terrible, it may cause any computer running it to spontaneously explode. Caveat Emptor.
 
 Tech stack:
-Linux:  PopOs! 20.04 LTS / LKV 5.17
-erlang: 24.3.4
-elixir: 1.13.4-otp-24
+* Linux:  PopOs! 20.04 LTS / LKV 5.17
+* erlang: 24.3.4
+* elixir: 1.13.4-otp-24
 
 Constructive criticisms most welcome, especially if they come in PR or links to solid documentation.
 
