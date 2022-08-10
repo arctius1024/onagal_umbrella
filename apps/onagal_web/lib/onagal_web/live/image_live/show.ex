@@ -4,7 +4,11 @@ defmodule OnagalWeb.ImageLive.Show do
   alias Onagal.Images
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    # if connected?(socket) do
+    #   Phoenix.PubSub.subscribe(Onagal.PubSub, "page_#{get_user_id(session)}")
+    # end
+
     {:ok, socket}
   end
 
@@ -21,6 +25,17 @@ defmodule OnagalWeb.ImageLive.Show do
      |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))}
   end
 
+  @impl true
+  def handle_info(%{"filter" => filters} = _info, socket) do
+    {:noreply, socket |> assign(:filter, filters)}
+  end
+
   defp page_title(:show), do: "Show Image"
   defp page_title(:edit), do: "Edit Image"
+
+  # defp get_user_id(session) do
+  #   user_token = session["user_token"]
+  #   user = user_token && Onagal.Accounts.get_user_by_session_token(user_token)
+  #   user.id
+  # end
 end

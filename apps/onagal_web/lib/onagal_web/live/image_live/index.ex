@@ -5,8 +5,14 @@ defmodule OnagalWeb.ImageLive.Index do
   alias Onagal.Tags
 
   @impl true
-  def mount(params, _session, socket) do
-    {:ok, socket}
+  def mount(_params, session, socket) do
+    # if connected?(socket) do
+    #   Phoenix.PubSub.subscribe(Onagal.PubSub, "page_#{get_user_id(session)}")
+    # end
+
+    {:ok,
+     socket
+     |> assign(:user_id, get_user_id(session))}
   end
 
   @impl true
@@ -35,6 +41,12 @@ defmodule OnagalWeb.ImageLive.Index do
     socket = assign(socket, :filter, %{"tags" => tags})
     socket = assign(socket, :page, list_images(params, socket.assigns.filter))
 
+    # Phoenix.PubSub.broadcast(
+    #   Onagal.PubSub,
+    #   "page_#{socket.assigns.user_id}",
+    #   %{"filter" => socket.assigns.filter}
+    # )
+
     {:noreply, socket}
   end
 
@@ -43,8 +55,19 @@ defmodule OnagalWeb.ImageLive.Index do
     socket = assign(socket, :filter, %{"tags" => ""})
     socket = assign(socket, :page, list_images(params, socket.assigns.filter))
 
+    # Phoenix.PubSub.broadcast(
+    #   Onagal.PubSub,
+    #   "page_#{socket.assigns.user_id}",
+    #   %{"filter" => socket.assigns.filter}
+    # )
+
     {:noreply, socket}
   end
+
+  # @impl true
+  # def handle_info(%{"filter" => filters} = _info, socket) do
+  #   {:noreply, socket |> assign(:filter, filters)}
+  # end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
@@ -85,4 +108,10 @@ defmodule OnagalWeb.ImageLive.Index do
 
     Images.web_thumbnail_image_path(image)
   end
+
+  # defp get_user_id(session) do
+  #   user_token = session["user_token"]
+  #   user = user_token && Onagal.Accounts.get_user_by_session_token(user_token)
+  #   user.id
+  # end
 end
