@@ -2,13 +2,10 @@ defmodule OnagalWeb.ImageLive.Index do
   use OnagalWeb, :live_view
 
   alias Onagal.Images
-  alias Onagal.Images.Image
+  alias Onagal.Tags
 
   @impl true
   def mount(params, _session, socket) do
-    # page = list_images(params)
-    # {:ok, assign(socket, :images, list_images())}
-    # {:ok, assign(socket, :page, page)}
     {:ok, socket}
   end
 
@@ -23,17 +20,30 @@ defmodule OnagalWeb.ImageLive.Index do
     |> assign(:image, Images.get_image!(id))
   end
 
-  # defp apply_action(socket, :new, _params) do
-  #   socket
-  #   |> assign(:page_title, "New Image")
-  #   |> assign(:image, %Image{})
-  # end
-
   defp apply_action(socket, :index, params) do
+    filter = fn -> %{"tags" => ""} end
+
     socket
     |> assign(:page_title, "Listing Images")
     |> assign(:image, nil)
-    |> assign(:page, list_images(params))
+    |> assign_new(:filter, filter)
+    |> assign(:page, list_images(params, filter.()))
+  end
+
+  @impl true
+  def handle_event("filter", %{"image_tag_filter" => %{"tags" => tags}} = params, socket) do
+    socket = assign(socket, :filter, %{"tags" => tags})
+    socket = assign(socket, :page, list_images(params, socket.assigns.filter))
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("filter", %{} = params, socket) do
+    socket = assign(socket, :filter, %{"tags" => ""})
+    socket = assign(socket, :page, list_images(params, socket.assigns.filter))
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -45,10 +55,29 @@ defmodule OnagalWeb.ImageLive.Index do
     {:noreply, assign(socket, :images, list_images({}))}
   end
 
-  defp list_images(params) do
-    # Images.list_images()
-    page = Images.paginate_images(params)
+  @impl true
+  @doc """
+    returns a list of paginated images
+    params: pagination config
+    filters: tag filters (%{"tags" => "" | [] })
+  """
+  defp list_images(params, %{"tags" => ""} = filters) do
+    Images.paginate_images(params)
   end
+
+  defp list_images(params, %{"tags" => tags} = filters) when is_binary(tags) do
+    Images.paginate_images_with_tags(params, [tags])
+  end
+
+  defp list_images(params, %{"tags" => tags} = filters) when is_list(tags) do
+    Images.paginate_images_with_tags(params, tags)
+  end
+
+  defp list_images(params) do
+    Images.paginate_images(params)
+  end
+
+  defp available_tags, do: Tags.list_tags()
 
   defp resolve_thumbnail_path(image) do
     if !File.exists?(Images.system_thumbnail_image_path(image)),

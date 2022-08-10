@@ -1,0 +1,12 @@
+<div>
+    <.form let={f}
+        for={@conn}
+        phx-submit="filter"
+        as="image_tag_filter"
+    >
+        <%= label f, :tags %>
+        <%= multiple_select f, :tags, Onagal.Tags.list_tags_as_options(), selected: [Enum.map(assigns.filter, fn {k,v} -> v end)] %>
+
+        <%= submit "Filter" %>
+    </.form>
+</div>

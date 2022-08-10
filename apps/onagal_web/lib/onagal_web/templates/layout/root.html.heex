@@ -11,11 +11,8 @@
   </head>
   <body>
     <header>
-      <section class="container">
-        <nav>
-          <%= render "_user_menu.html", assigns %>
-        </nav>
-        <nav>
+      <div class="flex-container" style="display: flex">
+        <div class="flex-child" style="flex: 1; background: #3199aa">
           <table>
             <tr>
               <td><%= link "Images", to: Routes.image_index_path(@conn, :index) %></td>
@@ -24,17 +21,19 @@
               <td><%= link "Galleries", to: Routes.gallery_index_path(@conn, :index) %></td>
             </tr>
           </table>
-        </nav>
-      </section>
-    </header>
-    <div class="flex-container" style="display: flex;">
-      <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
-        <ul style="list-style-type: none; margin: 1; padding: 1;">
-          <li><%= link "Tags", to: Routes.tag_index_path(@conn, :index) %></li>
-          <li><%= link "Tagsets", to: Routes.tagset_index_path(@conn, :index) %></li>
-        </ul>
+        </div>
+        <div class="flex-child" style="flex: 0 1 240px; background: #aa7724">
+          <%= render "_user_menu.html", assigns %>
+        </div>
       </div>
-      <div class="flex-child" style="flex: 1;">
+    </header>
+    <div class="flex-container" style="display: flex; align-items: stretch;">
+      <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
+        <%= if @live_action == :index and @live_module == OnagalWeb.ImageLive.Index do %>
+          <%= render "_filter_form.html", assigns %>
+        <% end %>
+      </div>
+      <div class="flex-child" style="flex: 1; height: 720px;">
         <%= @inner_content %>
       </div>
     </div>
