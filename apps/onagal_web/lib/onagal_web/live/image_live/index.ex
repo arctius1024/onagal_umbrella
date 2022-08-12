@@ -6,13 +6,15 @@ defmodule OnagalWeb.ImageLive.Index do
 
   @impl true
   def mount(_params, session, socket) do
-    # if connected?(socket) do
-    #   Phoenix.PubSub.subscribe(Onagal.PubSub, "page_#{get_user_id(session)}")
-    # end
+    socket =
+      socket
+      |> PhoenixLiveSession.maybe_subscribe(session)
+      |> put_session_filter(session)
 
-    {:ok,
-     socket
-     |> assign(:user_id, get_user_id(session))}
+    push_event(socket, "tags", socket.assigns.filter)
+    push_event(socket, "filters", socket.assigns.filter)
+
+    {:ok, socket}
   end
 
   @impl true
@@ -27,25 +29,17 @@ defmodule OnagalWeb.ImageLive.Index do
   end
 
   defp apply_action(socket, :index, params) do
-    filter = fn -> %{"tags" => ""} end
-
     socket
     |> assign(:page_title, "Listing Images")
     |> assign(:image, nil)
-    |> assign_new(:filter, filter)
-    |> assign(:page, list_images(params, filter.()))
+    |> assign(:page, list_images(params, socket.assigns.filter))
   end
 
   @impl true
   def handle_event("filter", %{"image_tag_filter" => %{"tags" => tags}} = params, socket) do
     socket = assign(socket, :filter, %{"tags" => tags})
     socket = assign(socket, :page, list_images(params, socket.assigns.filter))
-
-    # Phoenix.PubSub.broadcast(
-    #   Onagal.PubSub,
-    #   "page_#{socket.assigns.user_id}",
-    #   %{"filter" => socket.assigns.filter}
-    # )
+    PhoenixLiveSession.put_session(socket, "filter", socket.assigns.filter)
 
     {:noreply, socket}
   end
@@ -54,20 +48,10 @@ defmodule OnagalWeb.ImageLive.Index do
   def handle_event("filter", %{} = params, socket) do
     socket = assign(socket, :filter, %{"tags" => ""})
     socket = assign(socket, :page, list_images(params, socket.assigns.filter))
-
-    # Phoenix.PubSub.broadcast(
-    #   Onagal.PubSub,
-    #   "page_#{socket.assigns.user_id}",
-    #   %{"filter" => socket.assigns.filter}
-    # )
+    PhoenixLiveSession.put_session(socket, "filter", socket.assigns.filter)
 
     {:noreply, socket}
   end
-
-  # @impl true
-  # def handle_info(%{"filter" => filters} = _info, socket) do
-  #   {:noreply, socket |> assign(:filter, filters)}
-  # end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
@@ -109,9 +93,8 @@ defmodule OnagalWeb.ImageLive.Index do
     Images.web_thumbnail_image_path(image)
   end
 
-  # defp get_user_id(session) do
-  #   user_token = session["user_token"]
-  #   user = user_token && Onagal.Accounts.get_user_by_session_token(user_token)
-  #   user.id
-  # end
+  defp put_session_filter(socket, session) do
+    socket
+    |> assign(:filter, Map.get(session, "filter", %{"tags" => ""}))
+  end
 end

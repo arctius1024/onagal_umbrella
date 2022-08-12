@@ -5,8 +5,11 @@ defmodule OnagalWeb.Endpoint do
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
-    store: :cookie,
-    key: "_onagal_web_key",
+    store: PhoenixLiveSession,
+    pub_sub: Onagal.PubSub,
+    key: "session",
+#    store: :cookie,
+#    key: "_onagal_web_key",
     signing_salt: "G21lENzx"
   ]
 

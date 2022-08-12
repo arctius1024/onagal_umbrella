@@ -7,6 +7,9 @@
         <%= label f, :tags %>
         <%= multiple_select f, :tags, Onagal.Tags.list_tags_as_options(), selected: [Enum.map(assigns.filter, fn {k,v} -> v end)] %>
 
+        <%= label f, :filters %>
+        <%= text_input f, :filters, value: Enum.map(assigns.filter, fn {k,v} -> v end) %>
+
         <%= submit "Filter" %>
     </.form>
 </div>

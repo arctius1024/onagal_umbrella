@@ -44,7 +44,8 @@ defmodule Onagal.Images do
 
   def get_image!(id), do: Repo.get!(Image, id)
 
-  def get_prev_image(id) do
+  @spec get_prev_image(integer, map) :: any
+  def get_prev_image(id, %{"tags" => ""} = filter) do
     query =
       from i in Image,
         where: i.id < ^id,
@@ -54,12 +55,53 @@ defmodule Onagal.Images do
     Repo.one(query) || get_last_image()
   end
 
-  def get_next_image(id) do
+  @doc """
+    FIX: This needs to be refactored to share query basics with the normal index image tag
+    fiter. Yes this does not handle wrap arounds.
+  """
+  def get_prev_image(id, %{"tags" => tags} = filter) do
+    image_ids = image_ids_matching_tags(tags)
+
+    query =
+      from(image in Image,
+        where: image.id in ^image_ids and image.id < ^id,
+        preload: [:tags],
+        # join: tag in assoc(image, :tags),
+        order_by: [desc: image.id],
+        group_by: image.id,
+        limit: 1
+      )
+
+    Repo.one(query) || get_last_image()
+  end
+
+  def get_next_image(id, %{"tags" => ""} = filter) do
     query =
       from i in Image,
         where: i.id > ^id,
+        preload: [:tags],
         order_by: i.id,
         limit: 1
+
+    Repo.one(query) || get_first_image()
+  end
+
+  @doc """
+    FIX: This needs to be refactored to share query basics with the normal index image tag
+    fiter. Yes this does not handle wrap arounds.
+  """
+  def get_next_image(id, %{"tags" => tags} = filter) do
+    image_ids = image_ids_matching_tags(tags)
+
+    query =
+      from(image in Image,
+        where: image.id in ^image_ids and image.id > ^id,
+        preload: [:tags],
+        # join: tag in assoc(image, :tags),
+        order_by: image.id,
+        group_by: image.id,
+        limit: 1
+      )
 
     Repo.one(query) || get_first_image()
   end
@@ -67,6 +109,7 @@ defmodule Onagal.Images do
   def get_first_image() do
     query =
       from i in Image,
+        preload: [:tags],
         order_by: i.id,
         limit: 1
 
@@ -76,6 +119,7 @@ defmodule Onagal.Images do
   def get_last_image() do
     query =
       from i in Image,
+        preload: [:tags],
         order_by: [desc: i.id],
         limit: 1
 
@@ -153,7 +197,7 @@ defmodule Onagal.Images do
       from(image in Image,
         where: image.id == ^id,
         preload: [:tags],
-        join: tag in assoc(image, :tags),
+        # join: tag in assoc(image, :tags),
         group_by: image.id
       )
 
@@ -218,7 +262,7 @@ defmodule Onagal.Images do
       from(image in Image,
         where: image.id in ^image_ids,
         preload: [:tags],
-        join: tag in assoc(image, :tags),
+        # join: tag in assoc(image, :tags),
         group_by: image.id
       )
 
