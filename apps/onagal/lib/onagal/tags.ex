@@ -4,7 +4,7 @@ defmodule Onagal.Tags do
   """
 
   alias Onagal.Repo
-  alias Onagal.Tags.{Tag, Tagset, Gallery}
+  alias Onagal.Tags.{Tag, Tagset, Filterset}
 
   import Ecto.Query
 
@@ -113,41 +113,41 @@ defmodule Onagal.Tags do
 
   # -------------------------------------------------------------------------------------
 
-  def list_galleries do
-    Repo.all(Gallery)
+  def list_filtersets do
+    Repo.all(Filterset)
   end
 
-  def get_gallery!(id), do: Repo.get!(Gallery, id)
+  def get_filterset!(id), do: Repo.get!(Filterset, id)
 
-  def create_gallery(attrs \\ %{}) do
-    %Gallery{}
-    |> Gallery.changeset(attrs)
+  def create_filterset(attrs \\ %{}) do
+    %Filterset{}
+    |> Filterset.changeset(attrs)
     |> Repo.insert()
   end
 
-  def change_gallery(%Gallery{} = gallery, attrs \\ %{}) do
-    Gallery.changeset(gallery, attrs)
+  def change_filterset(%Filterset{} = filterset, attrs \\ %{}) do
+    Filterset.changeset(filterset, attrs)
   end
 
-  def update_gallery(%Gallery{} = gallery, attrs) do
-    gallery
-    |> Gallery.changeset(attrs)
+  def update_filterset(%Filterset{} = filterset, attrs) do
+    filterset
+    |> Filterset.changeset(attrs)
     |> Repo.update()
   end
 
-  def delete_gallery(%Gallery{} = gallery) do
-    Repo.delete(gallery)
+  def delete_filterset(%Filterset{} = filterset) do
+    Repo.delete(filterset)
   end
 
-  def update_gallery_tags(gallery, tags) do
-    gallery
+  def update_filterset_tags(filterset, tags) do
+    filterset
     |> Repo.preload(:tags)
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.put_assoc(:tags, tags)
     |> Repo.update()
   end
 
-  def get_gallery_tags(gallery) do
-    Repo.all(Ecto.assoc(gallery, :tags))
+  def get_filterset_tags(filterset) do
+    Repo.all(Ecto.assoc(filterset, :tags))
   end
 end

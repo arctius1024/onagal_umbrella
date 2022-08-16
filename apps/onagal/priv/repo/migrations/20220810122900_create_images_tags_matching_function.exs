@@ -1,4 +1,4 @@
-defmodule Onagal.Repo.Migrations.CreateUsersAuthTables do
+defmodule Onagal.Repo.Migrations.CreateImageswithAllTagNamesFunction do
   use Ecto.Migration
 
   def change do

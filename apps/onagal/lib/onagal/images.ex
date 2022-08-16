@@ -45,7 +45,7 @@ defmodule Onagal.Images do
   def get_image!(id), do: Repo.get!(Image, id)
 
   @spec get_prev_image(integer, map) :: any
-  def get_prev_image(id, %{"tags" => ""} = filter) do
+  def get_prev_image(id, []) do
     query =
       from i in Image,
         where: i.id < ^id,
@@ -59,8 +59,8 @@ defmodule Onagal.Images do
     FIX: This needs to be refactored to share query basics with the normal index image tag
     fiter. Yes this does not handle wrap arounds.
   """
-  def get_prev_image(id, %{"tags" => tags} = filter) do
-    image_ids = image_ids_matching_tags(tags)
+  def get_prev_image(id, tag_filter) do
+    image_ids = image_ids_matching_tags(tag_filter)
 
     query =
       from(image in Image,
@@ -75,7 +75,7 @@ defmodule Onagal.Images do
     Repo.one(query) || get_last_image()
   end
 
-  def get_next_image(id, %{"tags" => ""} = filter) do
+  def get_next_image(id, []) do
     query =
       from i in Image,
         where: i.id > ^id,
@@ -90,8 +90,8 @@ defmodule Onagal.Images do
     FIX: This needs to be refactored to share query basics with the normal index image tag
     fiter. Yes this does not handle wrap arounds.
   """
-  def get_next_image(id, %{"tags" => tags} = filter) do
-    image_ids = image_ids_matching_tags(tags)
+  def get_next_image(id, tag_filter) do
+    image_ids = image_ids_matching_tags(tag_filter)
 
     query =
       from(image in Image,

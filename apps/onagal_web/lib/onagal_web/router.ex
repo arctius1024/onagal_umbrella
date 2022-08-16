@@ -90,47 +90,15 @@ defmodule OnagalWeb.Router do
     post("/users/confirm/:token", UserConfirmationController, :update)
   end
 
-  scope "/images", OnagalWeb do
+  scope "/gallery", OnagalWeb do
     pipe_through([:browser, :require_authenticated_user])
 
-    live("/", ImageLive.Index, :index)
-    # live("/new", ImageLive.Index, :new)
-    live("/:id/edit", ImageLive.Index, :edit)
+    live_session :default do
+      live("/", GalleryLive.Index, :index)
+      live("/:id", GalleryLive.Index, :show)
 
-    live("/:id", ImageLive.Show, :show)
-    live("/:id/show/edit", ImageLive.Show, :edit)
-  end
-
-  scope "/tags", OnagalWeb do
-    pipe_through([:browser, :require_authenticated_user])
-
-    live("/", TagLive.Index, :index)
-    live("/new", TagLive.Index, :new)
-    live("/:id/edit", TagLive.Index, :edit)
-
-    live("/:id", TagLive.Show, :show)
-    live("/:id/show/edit", TagLive.Show, :edit)
-  end
-
-  scope "/tagsets", OnagalWeb do
-    pipe_through([:browser, :require_authenticated_user])
-
-    live("/", TagsetLive.Index, :index)
-    live("/new", TagsetLive.Index, :new)
-    live("/:id/edit", TagsetLive.Index, :edit)
-
-    live("/:id", TagsetLive.Show, :show)
-    live("/:id/show/edit", TagsetLive.Show, :edit)
-  end
-
-  scope "/galleries", OnagalWeb do
-    pipe_through([:browser, :require_authenticated_user])
-
-    live("/", GalleryLive.Index, :index)
-    live("/new", GalleryLive.Index, :new)
-    live("/:id/edit", GalleryLive.Index, :edit)
-
-    live("/:id", GalleryLive.Show, :show)
-    live("/:id/show/edit", GalleryLive.Show, :edit)
+      live("/show/:id", GalleryLive.Show, :show)
+      # live("/:id/info", GalleryLive.Show, :info)
+    end
   end
 end

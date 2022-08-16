@@ -1,5 +1,12 @@
 import Config
 
+# We don't run a server during test. If one is required,
+# you can enable the server option below.
+config :onagal_simple, OnagalSimple.Endpoint,
+  http: [ip: {127, 0, 0, 1}, port: 5002],
+  secret_key_base: "Q6hoh649BQssJnEow1O+2JeyPnQfdlzWN6n6lNmHDUaH/YcUAc0DOMkYrRmh0uY5",
+  server: false
+
 # Only in tests, remove the complexity from the password hashing algorithm
 config :bcrypt_elixir, :log_rounds, 1
 
