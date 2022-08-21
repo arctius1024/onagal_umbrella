@@ -44,7 +44,10 @@ defmodule Onagal.Images do
 
   def get_image!(id), do: Repo.get!(Image, id)
 
-  def get_prev_image(id) do
+  def get_first(), do: Image |> first() |> Repo.one()
+
+  @spec get_prev_image(integer, map) :: any
+  def get_prev_image(id, []) do
     query =
       from i in Image,
         where: i.id < ^id,
@@ -54,19 +57,93 @@ defmodule Onagal.Images do
     Repo.one(query) || get_last_image()
   end
 
-  def get_next_image(id) do
+  @doc """
+    FIX: This needs to be refactored to share query basics with the normal index image tag
+    fiter. Yes this does not handle wrap arounds.
+  """
+  def get_prev_image(id, tag_filter) do
+    image_ids = image_ids_matching_tags(tag_filter)
+
+    query =
+      from(image in Image,
+        where: image.id in ^image_ids and image.id < ^id,
+        preload: [:tags],
+        # join: tag in assoc(image, :tags),
+        order_by: [desc: image.id],
+        group_by: image.id,
+        limit: 1
+      )
+
+    Repo.one(query) || get_last_image()
+  end
+
+  def get_next_image(id, []) do
     query =
       from i in Image,
         where: i.id > ^id,
+        preload: [:tags],
         order_by: i.id,
         limit: 1
 
     Repo.one(query) || get_first_image()
   end
 
+  @doc """
+    FIX: This needs to be refactored to share query basics with the normal index image tag
+    fiter. Yes this does not handle wrap arounds.
+  """
+  def get_next_image(id, tag_filter) do
+    image_ids = image_ids_matching_tags(tag_filter)
+
+    query =
+      from(image in Image,
+        where: image.id in ^image_ids and image.id > ^id,
+        preload: [:tags],
+        # join: tag in assoc(image, :tags),
+        order_by: image.id,
+        group_by: image.id,
+        limit: 1
+      )
+
+    Repo.one(query) || get_first_image()
+  end
+
+  def find_page_tuple(page, image) do
+    IO.puts("find_page_tuple")
+
+    case index = Enum.find_index(page.entries, fn img -> img.id == image.id end) do
+      nil ->
+        []
+
+      _ ->
+        [
+          Enum.at(page.entries, index - 1) || tl(page.entries),
+          image,
+          Enum.at(page.entries, index + 1) || hd(page.entries)
+        ]
+    end
+  end
+
+  def next_image_on_page(page, image) do
+    case find_page_tuple(page, image) do
+      [] -> get_first()
+      [_, _, next_image] -> next_image
+    end
+  end
+
+  def prev_image_on_page(page, image) do
+    IO.puts("images prev_image_on_page")
+
+    case find_page_tuple(page, image) do
+      [] -> get_first()
+      [prev_image, _, _] -> prev_image
+    end
+  end
+
   def get_first_image() do
     query =
       from i in Image,
+        preload: [:tags],
         order_by: i.id,
         limit: 1
 
@@ -76,6 +153,7 @@ defmodule Onagal.Images do
   def get_last_image() do
     query =
       from i in Image,
+        preload: [:tags],
         order_by: [desc: i.id],
         limit: 1
 
@@ -153,7 +231,7 @@ defmodule Onagal.Images do
       from(image in Image,
         where: image.id == ^id,
         preload: [:tags],
-        join: tag in assoc(image, :tags),
+        # join: tag in assoc(image, :tags),
         group_by: image.id
       )
 
@@ -205,6 +283,13 @@ defmodule Onagal.Images do
 
   def web_thumbnail_image_path(_), do: "/images/invalid.png"
 
+  def resolve_thumbnail_path(image) do
+    if !File.exists?(system_thumbnail_image_path(image)),
+      do: generate_thumbnail(image)
+
+    web_thumbnail_image_path(image)
+  end
+
   @doc """
     params: used for skrivener
     tags: list of tags to return paginated image list
@@ -218,7 +303,7 @@ defmodule Onagal.Images do
       from(image in Image,
         where: image.id in ^image_ids,
         preload: [:tags],
-        join: tag in assoc(image, :tags),
+        # join: tag in assoc(image, :tags),
         group_by: image.id
       )
 

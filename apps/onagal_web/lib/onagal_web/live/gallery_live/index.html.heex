@@ -1,37 +1,12 @@
-<h1>Listing Galleries</h1>
-
-<%= if @live_action in [:new, :edit] do %>
-  <.modal return_to={Routes.gallery_index_path(@socket, :index)}>
-    <.live_component
-      module={OnagalWeb.GalleryLive.FormComponent}
-      id={@gallery.id || :new}
-      title={@page_title}
-      action={@live_action}
-      gallery={@gallery}
-      return_to={Routes.gallery_index_path(@socket, :index)}
-    />
-  </.modal>
-<% end %>
-
-<table>
-  <thead>
-    <tr>
-
-      <th></th>
-    </tr>
-  </thead>
-  <tbody id="galleries">
-    <%= for gallery <- @galleries do %>
-      <tr id={"gallery-#{gallery.id}"}>
-
-        <td>
-          <span><%= live_redirect "Show", to: Routes.gallery_show_path(@socket, :show, gallery) %></span>
-          <span><%= live_patch "Edit", to: Routes.gallery_index_path(@socket, :edit, gallery) %></span>
-          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: gallery.id, data: [confirm: "Are you sure?"] %></span>
-        </td>
-      </tr>
+<div class="flex-container" style="display: flex; align-items: stretch;">
+  <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
+    <.live_component module={OnagalWeb.GalleryLive.FilterComponent} id="filter" tag_list={@tag_list} tag_filter={@tag_filter} />
+  </div>
+  <div class="flex-child" style="flex: 1; height: 720px;">
+    <%= if @live_action == :index do %>
+      <.live_component module={OnagalWeb.GalleryLive.MontageComponent} id="montage" page={@page} />
+    <% else %>
+      <.live_component module={OnagalWeb.GalleryLive.DisplayComponent} id="display" prev_image={@prev_image} next_image={@next_image} image_path={@image_path}/>
     <% end %>
-  </tbody>
-</table>
-
-<span><%= live_patch "New Gallery", to: Routes.gallery_index_path(@socket, :new) %></span>
+  </div>
+</div>
