@@ -44,6 +44,8 @@ defmodule Onagal.Images do
 
   def get_image!(id), do: Repo.get!(Image, id)
 
+  def get_first(), do: Image |> first() |> Repo.one()
+
   @spec get_prev_image(integer, map) :: any
   def get_prev_image(id, []) do
     query =
@@ -104,6 +106,38 @@ defmodule Onagal.Images do
       )
 
     Repo.one(query) || get_first_image()
+  end
+
+  def find_page_tuple(page, image) do
+    IO.puts("find_page_tuple")
+
+    case index = Enum.find_index(page.entries, fn img -> img.id == image.id end) do
+      nil ->
+        []
+
+      _ ->
+        [
+          Enum.at(page.entries, index - 1) || tl(page.entries),
+          image,
+          Enum.at(page.entries, index + 1) || hd(page.entries)
+        ]
+    end
+  end
+
+  def next_image_on_page(page, image) do
+    case find_page_tuple(page, image) do
+      [] -> get_first()
+      [_, _, next_image] -> next_image
+    end
+  end
+
+  def prev_image_on_page(page, image) do
+    IO.puts("images prev_image_on_page")
+
+    case find_page_tuple(page, image) do
+      [] -> get_first()
+      [prev_image, _, _] -> prev_image
+    end
   end
 
   def get_first_image() do
@@ -248,6 +282,13 @@ defmodule Onagal.Images do
   end
 
   def web_thumbnail_image_path(_), do: "/images/invalid.png"
+
+  def resolve_thumbnail_path(image) do
+    if !File.exists?(system_thumbnail_image_path(image)),
+      do: generate_thumbnail(image)
+
+    web_thumbnail_image_path(image)
+  end
 
   @doc """
     params: used for skrivener
