@@ -1,26 +1,12 @@
-<h1>Listing Images</h1>
-
-<ul class="imglist">
-  <%= for image <- @page.entries do %>
-    <li>
-      <%= live_redirect to: Routes.gallery_show_path(@socket, :show, image) do %>
-        <img src={resolve_thumbnail_path(image)} alt="image.original_name">
-      <% end %>
-    </li>
-  <% end %>
-</ul>
-
-
-<div class="pagination">
-  <%= if @page.page_number > 1 do %>
-    <%= live_patch "<< Prev Page",
-        to: Routes.gallery_index_path(@socket, :index, page: @page.page_number - 1),
-        class: "pagination-link" %>
-  <% end %>
-
-  <%= if @page.page_number < @page.total_pages do %>
-    <%= live_patch "Next Page >>",
-        to: Routes.gallery_index_path(@socket, :index, page: @page.page_number + 1),
-        class: "pagination-link" %>
-  <% end %>
+<div class="flex-container" style="display: flex; align-items: stretch;">
+  <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
+    <.live_component module={OnagalWeb.GalleryLive.FilterComponent} id="filter" tag_list={@tag_list} tag_filter={@tag_filter} />
+  </div>
+  <div class="flex-child" style="flex: 1; height: 720px;">
+    <%= if @live_action == :index do %>
+      <.live_component module={OnagalWeb.GalleryLive.MontageComponent} id="montage" page={@page} />
+    <% else %>
+      <.live_component module={OnagalWeb.GalleryLive.DisplayComponent} id="display" prev_image={@prev_image} next_image={@next_image} image_path={@image_path}/>
+    <% end %>
+  </div>
 </div>

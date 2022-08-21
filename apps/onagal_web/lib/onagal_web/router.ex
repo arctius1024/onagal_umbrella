@@ -97,8 +97,17 @@ defmodule OnagalWeb.Router do
       live("/", GalleryLive.Index, :index)
       live("/:id", GalleryLive.Index, :show)
 
-      live("/show/:id", GalleryLive.Show, :show)
+      # live("/show/:id", GalleryLive.Show, :show)
       # live("/:id/info", GalleryLive.Show, :info)
+    end
+  end
+
+  scope "/test", OnagalWeb do
+    pipe_through([:browser, :require_authenticated_user])
+
+    live_session :test do
+      live("/", TestLive.Index, :index)
+      live("/:id", TestLive.Index, :show)
     end
   end
 end
