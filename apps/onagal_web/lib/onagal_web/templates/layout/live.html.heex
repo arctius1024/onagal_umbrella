@@ -8,11 +8,4 @@
     phx-value-key="error"><%= live_flash(@flash, :error) %></p>
 </main>
 
-<div class="flex-container" style="display: flex; align-items: stretch;">
-  <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
-    <.live_component module={OnagalWeb.GalleryLive.FilterComponent} id="filter" tag_list={@tag_list} tag_filter={@tag_filter} />
-  </div>
-  <div class="flex-child" style="flex: 1; height: 720px;">
-    <%= @inner_content %>
-  </div>
-</div>
+<%= @inner_content %>
