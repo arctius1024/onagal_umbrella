@@ -4,12 +4,12 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
   alias Onagal.Images
 
   def update(
-        %{id: "montage", page: page} = _assigns,
+        %{id: "montage", images: images} = _assigns,
         socket
       ) do
     socket =
       socket
-      |> assign(:page, page)
+      |> assign(:images, images)
 
     {:ok, socket}
   end
@@ -18,7 +18,7 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
     ~H"""
     <div>
       <ul class="imglist">
-        <%= for image <- @page.entries do %>
+        <%= for image <- @images.entries do %>
           <li>
             <%= live_patch to: Routes.gallery_index_path(@socket, :show, image) do %>
               <img src={Images.resolve_thumbnail_path(image)} alt={image.original_name}>
@@ -28,15 +28,15 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
       </ul>
 
       <div class="pagination">
-        <%= if @page.page_number > 1 do %>
+        <%= if @images.page_number > 1 do %>
           <%= live_patch "<< Prev Page",
-              to: Routes.gallery_index_path(@socket, :index, page: @page.page_number - 1),
+              to: Routes.gallery_index_path(@socket, :index, page: @images.page_number - 1),
               class: "pagination-link" %>
         <% end %>
 
-        <%= if @page.page_number < @page.total_pages do %>
+        <%= if @images.page_number < @images.total_pages do %>
           <%= live_patch "Next Page >>",
-              to: Routes.gallery_index_path(@socket, :index, page: @page.page_number + 1),
+              to: Routes.gallery_index_path(@socket, :index, page: @images.page_number + 1),
               class: "pagination-link" %>
         <% end %>
       </div>
