@@ -116,10 +116,12 @@ defmodule Onagal.Images do
         []
 
       _ ->
+        prev_index = if index == 0, do: index, else: index - 1
+
         [
-          Enum.at(page.entries, index - 1) || tl(page.entries),
+          Enum.at(page.entries, prev_index),
           image,
-          Enum.at(page.entries, index + 1) || hd(page.entries)
+          Enum.at(page.entries, index + 1)
         ]
     end
   end

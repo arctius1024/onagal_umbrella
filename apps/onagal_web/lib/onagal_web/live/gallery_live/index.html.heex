@@ -4,9 +4,9 @@
   </div>
   <div class="flex-child" style="flex: 1; height: 720px;">
     <%= if @live_action == :index do %>
-      <.live_component module={OnagalWeb.GalleryLive.MontageComponent} id="montage" page={@page} />
+      <.live_component module={OnagalWeb.GalleryLive.MontageComponent} id="montage" images={@images} />
     <% else %>
-      <.live_component module={OnagalWeb.GalleryLive.DisplayComponent} id="display" prev_image={@prev_image} next_image={@next_image} image_path={@image_path}/>
+      <.live_component module={OnagalWeb.GalleryLive.DisplayComponent} id="display" image_id={@image_id} prev_image={@prev_image} next_image={@next_image} image_path={@image_path}/>
     <% end %>
   </div>
 </div>

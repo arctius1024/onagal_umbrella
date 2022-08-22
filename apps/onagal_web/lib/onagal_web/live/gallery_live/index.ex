@@ -9,7 +9,6 @@ defmodule OnagalWeb.GalleryLive.Index do
 
     socket =
       socket
-      |> assign(:image, nil)
       |> assign(:tag_list, Onagal.Tags.list_tags_as_options())
       |> PhoenixLiveSession.maybe_subscribe(session)
       |> assign_session_filter(session)
@@ -22,12 +21,15 @@ defmodule OnagalWeb.GalleryLive.Index do
     IO.puts("handle_params")
 
     tag_filter = Map.get(socket.assigns, :tag_filter, [])
-    send_filter_update({:filter, tags: tag_filter})
 
     socket =
       socket
       |> assign(:tag_filter, tag_filter)
       |> assign(:tag_list, Onagal.Tags.list_tags_as_options())
+      |> assign(:images, list_images(params, tag_filter))
+      |> assign(:page, Map.get(params, "page", 1))
+
+    send_filter_update({:filter, tags: tag_filter})
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -35,16 +37,19 @@ defmodule OnagalWeb.GalleryLive.Index do
   defp apply_action(socket, :show, %{"id" => id} = params) do
     IO.puts("apply_action :show")
 
+    # Find image associated with image id passed in params
     image = Images.get_image!(id)
     tag_filter = socket.assigns.tag_filter
+    images = list_images_by_image_page(params, image, tag_filter)
 
-    page = OnagalWeb.GalleryLive.Index.list_images(params, tag_filter)
-    [prev_image, _, next_image] = Images.find_page_tuple(page, image)
+    [prev_image, _, next_image] = resolve_image_nav(images, image, tag_filter)
 
     socket
     |> assign(:next_image, next_image)
     |> assign(:prev_image, prev_image)
     |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))
+    |> assign(:page, images.page_number)
+    |> assign(:image_id, image.id)
   end
 
   defp apply_action(socket, :index, params) do
@@ -53,7 +58,7 @@ defmodule OnagalWeb.GalleryLive.Index do
     tag_filter = socket.assigns.tag_filter
 
     socket
-    |> assign(:page, list_images(params, tag_filter))
+    |> assign(:images, list_images(params, tag_filter))
   end
 
   @impl true
@@ -65,28 +70,25 @@ defmodule OnagalWeb.GalleryLive.Index do
   @impl true
   def handle_info({:tag_filter, [tags: tags, params: params]}, socket) do
     IO.puts("index handle_info :tag_filter")
-    # IO.inspect(tags)
-    # IO.inspect(params)
-    IO.puts("---------")
 
-    page = OnagalWeb.GalleryLive.Index.list_images(params, tags)
+    images = list_images(params, tags)
 
     image =
-      case page.entries do
+      case images.entries do
         [] -> get_default_image()
-        _ -> hd(page.entries)
+        _ -> hd(images.entries)
       end
 
     send_filter_update({:filter, tags: tags})
 
     case socket.assigns.live_action do
-      :index -> send_filter_update({:index, page: page})
-      :show -> send_filter_update({:show, socket: socket, page: page, image: image})
+      :index -> send_filter_update({:index, images: images})
+      :show -> send_filter_update({:show, socket: socket, images: images, image: image})
     end
 
     PhoenixLiveSession.put_session(socket, "tag_filter", tags)
 
-    {:noreply, socket |> assign(:page, page)}
+    {:noreply, socket |> assign(:images, images)}
   end
 
   defp send_filter_update({:filter, [tags: tags]}) do
@@ -98,29 +100,31 @@ defmodule OnagalWeb.GalleryLive.Index do
     )
   end
 
-  defp send_filter_update({:index, [page: page]}) do
+  defp send_filter_update({:index, [images: images]}) do
     IO.puts("index send_filter_update 1")
 
     send_update(
       OnagalWeb.GalleryLive.MontageComponent,
       id: "montage",
-      page: page
+      images: images
     )
   end
 
-  defp send_filter_update({:show, [socket: socket, page: page, image: image]}) do
+  defp send_filter_update({:show, [socket: socket, images: images, image: image]}) do
     IO.puts("index send_filter_update 2")
 
     send_update(
       OnagalWeb.GalleryLive.DisplayComponent,
       id: "display",
-      prev_image: Images.next_image_on_page(page, image),
-      next_image: Images.prev_image_on_page(page, image),
+      image_id: image.id,
+      prev_image: Images.next_image_on_page(images, image),
+      next_image: Images.prev_image_on_page(images, image),
       image_path: Routes.static_path(socket, Images.web_image_path(image))
     )
   end
 
   # TODO: cleanup/refactor sweep
+  # TODO: REALLY getting ugly in here, need to clean this up next commit
   ####### helper methods
 
   @doc """
@@ -142,6 +146,103 @@ defmodule OnagalWeb.GalleryLive.Index do
 
   def list_images(params) do
     Images.paginate_images(params)
+  end
+
+  def list_images_by_image_page(params, image, tag_filter) do
+    IO.puts("list_images_by_page")
+
+    images = list_images(params, tag_filter)
+
+    if verify_image_on_page(images, image) do
+      images
+    else
+      page = find_image_page(params, image, images, tag_filter)
+      list_images(Map.merge(params, %{page: page}), tag_filter)
+    end
+  end
+
+  def verify_image_on_page(images, image) do
+    IO.puts("verify_image_on_page")
+
+    if image.id >= hd(images.entries).id &&
+         image.id <= List.last(images.entries).id do
+      true
+    else
+      false
+    end
+  end
+
+  def find_image_page(params, image, images, tags) do
+    IO.puts("index find_image_page")
+
+    min_page_id = hd(images.entries).id
+    max_page_id = List.last(images.entries).id
+
+    cond do
+      image.id < min_page_id ->
+        find_image_page(
+          params,
+          image,
+          list_images(Map.merge(params, %{page: images.page_number - 1}), tags),
+          tags
+        )
+
+      image.id > max_page_id ->
+        find_image_page(
+          params,
+          image,
+          list_images(Map.merge(params, %{page: images.page_number + 1}), tags),
+          tags
+        )
+
+      true ->
+        images.page_number
+    end
+  end
+
+  defp resolve_image_nav(images, image, tags) do
+    IO.puts("index resolve_image_nav")
+
+    [prev_image, _, next_image] = Images.find_page_tuple(images, image)
+
+    prev_image = resolve_prev_image(images, prev_image, tags)
+    next_image = resolve_next_image(images, next_image, tags)
+
+    [prev_image, nil, next_image]
+  end
+
+  defp resolve_prev_image(images, prev_image, tags) do
+    IO.puts("index resolve_prev_image")
+    page = images.page_number
+
+    case [prev_image, page] do
+      [nil, 1] ->
+        hd(images.entries)
+
+      [nil, _] ->
+        prev_page = list_images(%{"page" => page - 1}, tags)
+        List.last(prev_page.entries)
+
+      [_, _] ->
+        prev_image
+    end
+  end
+
+  defp resolve_next_image(images, next_image, tags) do
+    total_pages = images.total_pages
+    page = images.page_number
+
+    case [next_image, page] do
+      [nil, ^total_pages] ->
+        List.last(images.entries)
+
+      [nil, _] ->
+        next_page = list_images(%{"page" => page + 1}, tags)
+        hd(next_page.entries)
+
+      [_, _] ->
+        next_image
+    end
   end
 
   def get_default_image(), do: Images.get_first()
