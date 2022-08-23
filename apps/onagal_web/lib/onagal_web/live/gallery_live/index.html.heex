@@ -1,7 +1,7 @@
 <div class="flex-container" style="display: flex; align-items: stretch;">
-  <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
-    <.live_component module={OnagalWeb.GalleryLive.FilterComponent} id="filter" tag_list={@tag_list} tag_filter={@tag_filter} />
-  </div>
+    <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
+      <.live_component module={OnagalWeb.GalleryLive.FilterComponent} id="filter" tag_list={@tag_list} tag_filter={@tag_filter} enabled={@live_action == :index} />
+    </div>
   <div class="flex-child" style="flex: 1; height: 720px;">
     <%= if @live_action == :index do %>
       <.live_component module={OnagalWeb.GalleryLive.MontageComponent} id="montage" images={@images} />

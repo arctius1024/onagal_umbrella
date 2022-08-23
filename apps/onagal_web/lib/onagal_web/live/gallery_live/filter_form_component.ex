@@ -5,7 +5,7 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
 
   @impl true
   def update(
-        %{id: "filter", tag_filter: tag_filter, tag_list: tag_list} = _assigns,
+        %{id: "filter", tag_filter: tag_filter, tag_list: tag_list, enabled: enabled} = _assigns,
         socket
       )
       when is_list(tag_list) do
@@ -13,6 +13,7 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
       socket
       |> assign(:tag_filter, tag_filter)
       |> assign(:tag_list, tag_list)
+      |> assign(:enabled, enabled)
 
     {:ok, socket}
   end
@@ -37,8 +38,10 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
           <%= label f, :tags %>
           <%= multiple_select f, :tags, @tag_list, selected: @tag_filter %>
 
-          <%= label f, :submit %>
-          <%= submit "Filter" %>
+          <%= if @enabled do %>
+            <%= label f, :submit %>
+            <%= submit "Filter" %>
+          <% end %>
       </.form>
     </div>
     """
