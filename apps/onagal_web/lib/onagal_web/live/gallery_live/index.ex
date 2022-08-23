@@ -40,6 +40,47 @@ defmodule OnagalWeb.GalleryLive.Index do
     |> assign(:images, list_images(params, socket.assigns.tag_filter))
   end
 
+  defp apply_action(socket, :show, %{"id" => id} = params) do
+    IO.puts("apply_action :show")
+
+    image = Images.get_image!(id)
+    tag_filter = socket.assigns.tag_filter
+    # images = list_images_by_image_page(params, image, tag_filter)
+    images = list_images(params, tag_filter)
+
+    {prev_image, images} =
+      case get_prev_image(params, tag_filter, images, image) do
+        {:ok, prev_image} ->
+          {prev_image, images}
+
+        {:error, :next_page} ->
+          next_images =
+            list_images(Map.merge(params, %{page: images.page_number + 1}), tag_filter)
+
+          {:ok, prev_image} = get_prev_image(params, tag_filter, next_images, image)
+          {prev_image, next_images}
+      end
+
+    {next_image, images} =
+      case get_next_image(params, tag_filter, images, image) do
+        {:ok, next_image} ->
+          {next_image, images}
+
+        {:error, :prev_page} ->
+          prev_images =
+            list_images(Map.merge(params, %{page: images.page_number - 1}), tag_filter)
+
+          {:ok, next_image} = get_next_image(params, tag_filter, prev_images, image)
+          {next_image, prev_images}
+      end
+
+    socket
+    |> assign(:next_image, next_image)
+    |> assign(:prev_image, prev_image)
+    |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))
+    |> assign(:image_id, image.id)
+  end
+
   @impl true
   def handle_info({:live_session_updated, session}, socket) do
     IO.puts("test handle_info :live_session_updated")
@@ -106,6 +147,93 @@ defmodule OnagalWeb.GalleryLive.Index do
 
   def list_images(params) do
     Images.paginate_images(params)
+  end
+
+  ###### Show helper methods
+  def get_prev_image(params, tag_filter, images, image) do
+    case check_for_prev_image(images, image) do
+      {:ok, prev_image} ->
+        {:ok, prev_image}
+
+      {:error, :start_boundary} ->
+        {:ok, image}
+
+      {:error, :page_boundary} ->
+        prev_images = list_images(Map.merge(params, %{page: images.page_number - 1}), tag_filter)
+        {:ok, List.last(prev_images.entries)}
+
+      {:error, :next_page} ->
+        {:error, :next_page}
+
+      {:error, :prev_page} ->
+        {:error, :prev_page}
+    end
+  end
+
+  def check_for_prev_image(images, image) do
+    IO.puts("check_for_prev_image")
+
+    cond do
+      image.id < hd(images.entries).id ->
+        {:error, :prev_page}
+
+      image.id > List.last(images.entries).id ->
+        {:error, :next_page}
+
+      image.id == hd(images.entries).id && images.page_number == 1 ->
+        {:error, :start_boundary}
+
+      image.id == hd(images.entries).id ->
+        {:error, :page_boundary}
+
+      true ->
+        image_index = Enum.find_index(images.entries, fn img -> img.id == image.id end)
+        {:ok, Enum.at(images.entries, image_index - 1)}
+    end
+  end
+
+  def get_next_image(params, tag_filter, images, image) do
+    IO.puts("get_next_image")
+
+    case check_for_next_image(images, image) do
+      {:ok, next_image} ->
+        {:ok, next_image}
+
+      {:error, :end_boundary} ->
+        {:ok, image}
+
+      {:error, :page_boundary} ->
+        next_images = list_images(Map.merge(params, %{page: images.page_number + 1}), tag_filter)
+        {:ok, hd(next_images.entries)}
+
+      {:error, :next_page} ->
+        {:error, :next_page}
+
+      {:error, :prev_page} ->
+        {:error, :prev_page}
+    end
+  end
+
+  def check_for_next_image(images, image) do
+    IO.puts("check_for_next_image")
+
+    cond do
+      image.id < hd(images.entries).id ->
+        {:error, :prev_page}
+
+      image.id > List.last(images.entries).id ->
+        {:error, :next_page}
+
+      image.id == List.last(images.entries).id && images.total_pages == images.page_number ->
+        {:error, :end_boundary}
+
+      image.id == List.last(images.entries).id ->
+        {:error, :page_boundary}
+
+      true ->
+        image_index = Enum.find_index(images.entries, fn img -> img.id == image.id end)
+        {:ok, Enum.at(images.entries, image_index + 1)}
+    end
   end
 
   # generic session helper methods
