@@ -18,11 +18,22 @@ defmodule Onagal.Images do
     Image |> Repo.all()
   end
 
+  def paginate_images(params), do: paginate_images_without_tags(params)
+  def paginate_images(params, []), do: paginate_images_without_tags(params)
+
+  def paginate_images(params, tags) when is_list(tags),
+    do: paginate_images_with_tags(params, tags)
+
+  def paginate_images(params, tags) when is_binary(tags),
+    do: paginate_images_with_tags(params, [tags])
+
   @doc """
     params: used for skrivener
     tags: list of tags to return paginated image list
   """
   def paginate_images_with_tags(params, tags) do
+    IO.puts("images paginate_images_with_tags")
+
     # page =
     #   from(image in Image,
     #     preload: [:tags],
@@ -33,7 +44,7 @@ defmodule Onagal.Images do
     images_matching_tag_list(params, tags)
   end
 
-  def paginate_images(params) do
+  def paginate_images_without_tags(params) do
     Repo.paginate(Image, params)
   end
 
@@ -299,6 +310,7 @@ defmodule Onagal.Images do
   def images_matching_tag_list(_, []), do: []
 
   def images_matching_tag_list(params, tag_name_list) when is_list(tag_name_list) do
+    IO.puts("images_matching_tag_list[2]")
     image_ids = image_ids_matching_tags(tag_name_list)
 
     query =
@@ -309,6 +321,7 @@ defmodule Onagal.Images do
         group_by: image.id
       )
 
+    IO.inspect(params)
     Repo.paginate(query, params)
   end
 

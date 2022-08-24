@@ -38,7 +38,7 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
           <%= label f, :tags %>
           <%= multiple_select f, :tags, @tag_list, selected: @tag_filter %>
 
-          <%= if @enabled do %>
+          <%= if true do %>
             <%= label f, :submit %>
             <%= submit "Filter" %>
           <% end %>
