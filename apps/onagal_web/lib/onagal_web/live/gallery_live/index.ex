@@ -2,6 +2,7 @@ defmodule OnagalWeb.GalleryLive.Index do
   use OnagalWeb, :live_view
 
   alias Onagal.Images
+  alias Onagal.Paginate
 
   @impl true
   def mount(_params, session, socket) do
@@ -9,7 +10,6 @@ defmodule OnagalWeb.GalleryLive.Index do
 
     socket =
       socket
-      |> assign(:tag_list, Onagal.Tags.list_tags_as_options())
       |> PhoenixLiveSession.maybe_subscribe(session)
       |> assign_session_filter(session)
 
@@ -21,49 +21,54 @@ defmodule OnagalWeb.GalleryLive.Index do
     IO.puts("handle_params")
 
     tag_filter = Map.get(socket.assigns, :tag_filter, [])
+    tag_list = Onagal.Tags.list_tags_as_options()
 
     socket =
       socket
       |> assign(:tag_filter, tag_filter)
-      |> assign(:tag_list, Onagal.Tags.list_tags_as_options())
-      |> assign(:images, list_images(params, tag_filter))
-      |> assign(:page, Map.get(params, "page", 1))
-
-    send_filter_update({:filter, tags: tag_filter})
+      |> assign(:tag_list, tag_list)
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  # action handlers
+
+  defp apply_action(socket, :index, params) do
+    IO.puts("apply_action :index")
+
+    send_filter_update(:filter, socket.assigns)
+
+    socket
+    |> assign(:images, list_images(params, socket.assigns.tag_filter))
   end
 
   defp apply_action(socket, :show, %{"id" => id} = params) do
     IO.puts("apply_action :show")
 
-    # Find image associated with image id passed in params
     image = Images.get_image!(id)
     tag_filter = socket.assigns.tag_filter
-    images = list_images_by_image_page(params, image, tag_filter)
+    images = list_images(params, tag_filter)
 
-    [prev_image, _, next_image] = resolve_image_nav(images, image, tag_filter)
+    {page, images} = Paginate.find_image_page(images, tag_filter, image)
+
+    # Since we ensure we have the correct image page above, we shouldn't
+    # have an issue being more than a page off.
+    {:ok, prev_image} = get_prev_image(params, tag_filter, images, image)
+    {:ok, next_image} = get_next_image(params, tag_filter, images, image)
 
     socket
     |> assign(:next_image, next_image)
     |> assign(:prev_image, prev_image)
     |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))
-    |> assign(:page, images.page_number)
     |> assign(:image_id, image.id)
   end
 
-  defp apply_action(socket, :index, params) do
-    IO.puts("apply_action :index")
-
-    tag_filter = socket.assigns.tag_filter
-
-    socket
-    |> assign(:images, list_images(params, tag_filter))
-  end
+  # Filter helpers
 
   @impl true
   def handle_info({:live_session_updated, session}, socket) do
     IO.puts("test handle_info :live_session_updated")
+
     {:noreply, socket |> assign(:tag_filter, Map.get(session, "tag_filter", []))}
   end
 
@@ -75,15 +80,15 @@ defmodule OnagalWeb.GalleryLive.Index do
 
     image =
       case images.entries do
-        [] -> get_default_image()
+        [] -> Images.get_first()
         _ -> hd(images.entries)
       end
 
-    send_filter_update({:filter, tags: tags})
+    send_filter_update(:filter, socket.assigns)
 
     case socket.assigns.live_action do
-      :index -> send_filter_update({:index, images: images})
       :show -> send_filter_update({:show, socket: socket, images: images, image: image})
+      :index -> send_filter_update(:index, {images})
     end
 
     PhoenixLiveSession.put_session(socket, "tag_filter", tags)
@@ -91,16 +96,16 @@ defmodule OnagalWeb.GalleryLive.Index do
     {:noreply, socket |> assign(:images, images)}
   end
 
-  defp send_filter_update({:filter, [tags: tags]}) do
+  defp send_filter_update(:filter, %{tag_filter: tags, tag_list: tag_list} = _assigns) do
     send_update(
       OnagalWeb.GalleryLive.FilterComponent,
       id: "filter",
       tag_filter: tags,
-      tag_list: Onagal.Tags.list_tags_as_options()
+      tag_list: tag_list
     )
   end
 
-  defp send_filter_update({:index, [images: images]}) do
+  defp send_filter_update(:index, {images}) do
     IO.puts("index send_filter_update 1")
 
     send_update(
@@ -123,133 +128,24 @@ defmodule OnagalWeb.GalleryLive.Index do
     )
   end
 
-  # TODO: cleanup/refactor sweep
-  # TODO: REALLY getting ugly in here, need to clean this up next commit
-  ####### helper methods
+  ####### index helper methods
 
   @doc """
     returns a list of paginated images
     params: pagination config
     filters: tag filters (%{"tags" => "" | [] })
   """
-  def list_images(params, []) do
-    Images.paginate_images(params)
-  end
+  def list_images(params), do: Images.paginate_images(params)
+  def list_images(params, tags), do: Images.paginate_images(params, tags)
 
-  def list_images(params, tags) when is_binary(tags) do
-    Images.paginate_images_with_tags(params, [tags])
-  end
+  ###### Show helper methods
+  def get_prev_image(params, tag_filter, images, image),
+    do: Paginate.get_prev_image(params, tag_filter, images, image)
 
-  def list_images(params, tags) when is_list(tags) do
-    Images.paginate_images_with_tags(params, tags)
-  end
+  def get_next_image(params, tag_filter, images, image),
+    do: Paginate.get_next_image(params, tag_filter, images, image)
 
-  def list_images(params) do
-    Images.paginate_images(params)
-  end
-
-  def list_images_by_image_page(params, image, tag_filter) do
-    IO.puts("list_images_by_page")
-
-    images = list_images(params, tag_filter)
-
-    if verify_image_on_page(images, image) do
-      images
-    else
-      page = find_image_page(params, image, images, tag_filter)
-      list_images(Map.merge(params, %{page: page}), tag_filter)
-    end
-  end
-
-  def verify_image_on_page(images, image) do
-    IO.puts("verify_image_on_page")
-
-    if image.id >= hd(images.entries).id &&
-         image.id <= List.last(images.entries).id do
-      true
-    else
-      false
-    end
-  end
-
-  def find_image_page(params, image, images, tags) do
-    IO.puts("index find_image_page")
-
-    min_page_id = hd(images.entries).id
-    max_page_id = List.last(images.entries).id
-
-    cond do
-      image.id < min_page_id ->
-        find_image_page(
-          params,
-          image,
-          list_images(Map.merge(params, %{page: images.page_number - 1}), tags),
-          tags
-        )
-
-      image.id > max_page_id ->
-        find_image_page(
-          params,
-          image,
-          list_images(Map.merge(params, %{page: images.page_number + 1}), tags),
-          tags
-        )
-
-      true ->
-        images.page_number
-    end
-  end
-
-  defp resolve_image_nav(images, image, tags) do
-    IO.puts("index resolve_image_nav")
-
-    [prev_image, _, next_image] = Images.find_page_tuple(images, image)
-
-    prev_image = resolve_prev_image(images, prev_image, tags)
-    next_image = resolve_next_image(images, next_image, tags)
-
-    [prev_image, nil, next_image]
-  end
-
-  defp resolve_prev_image(images, prev_image, tags) do
-    IO.puts("index resolve_prev_image")
-    page = images.page_number
-
-    case [prev_image, page] do
-      [nil, 1] ->
-        hd(images.entries)
-
-      [nil, _] ->
-        prev_page = list_images(%{"page" => page - 1}, tags)
-        List.last(prev_page.entries)
-
-      [_, _] ->
-        prev_image
-    end
-  end
-
-  defp resolve_next_image(images, next_image, tags) do
-    total_pages = images.total_pages
-    page = images.page_number
-
-    case [next_image, page] do
-      [nil, ^total_pages] ->
-        List.last(images.entries)
-
-      [nil, _] ->
-        next_page = list_images(%{"page" => page + 1}, tags)
-        hd(next_page.entries)
-
-      [_, _] ->
-        next_image
-    end
-  end
-
-  def get_default_image(), do: Images.get_first()
-
-  # defp available_tags, do: Tags.list_tags()
-
-  # Deprecated non-working Phoenix Live Session hooks
+  # generic session helper methods
   defp assign_session_filter(socket, session) do
     socket
     |> assign(:tag_filter, get_session_filter(session))
@@ -257,10 +153,5 @@ defmodule OnagalWeb.GalleryLive.Index do
 
   defp get_session_filter(session) do
     Map.get(session, "tag_filter", [])
-  end
-
-  @spec stringify_filter(any) :: binary
-  def stringify_filter(tags) do
-    Enum.join(Enum.map(tags, fn v -> v end), ", ")
   end
 end
