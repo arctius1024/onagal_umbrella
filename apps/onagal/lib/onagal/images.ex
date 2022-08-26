@@ -248,7 +248,7 @@ defmodule Onagal.Images do
         group_by: image.id
       )
 
-    Repo.all(query)
+    Repo.one(query)
   end
 
   def match_image(size, digest) do

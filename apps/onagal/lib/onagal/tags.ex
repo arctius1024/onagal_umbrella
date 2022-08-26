@@ -26,6 +26,10 @@ defmodule Onagal.Tags do
     |> Repo.insert()
   end
 
+  def get_tag_by_name(tag_name) do
+    Repo.get_by(Tag, name: tag_name)
+  end
+
   def change_tag(%Tag{} = tag, attrs \\ %{}) do
     Tag.changeset(tag, attrs)
   end
@@ -46,6 +50,12 @@ defmodule Onagal.Tags do
     |> Repo.all()
   end
 
+  def list_tags_by_name(tag_names) do
+    Tag
+    |> where([tag], tag.name in ^tag_names)
+    |> Repo.all()
+  end
+
   def get_image_tags(image) do
     Repo.all(Ecto.assoc(image, :tags))
   end
@@ -58,12 +68,37 @@ defmodule Onagal.Tags do
     |> Repo.update()
   end
 
-  def upsert_image_tags(image, tag_ids) when is_list(tag_ids) do
+  def add_tag_to_image(image, tag_name) when is_binary(tag_name),
+    do: add_tag_to_image(image, get_tag_by_name(tag_name))
+
+  def add_tag_to_image(image, tag_id) when is_integer(tag_id),
+    do: add_tag_to_image(image, get_tag!(tag_id))
+
+  def add_tag_to_image(image, tag) do
+    image
+    |> Repo.preload(:tags)
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:tags, [tag | image.tags])
+    |> Repo.update()
+  end
+
+  def clear_image_tags(image), do: update_image_tags(image, [])
+
+  def upsert_image_tags_by_id(image, tag_ids) when is_list(tag_ids) do
     tags = list_tags_by_id(tag_ids)
 
-    with {:ok, _struct} <-
-           image
-           |> update_image_tags(tags) do
+    with {:ok, _struct} <- update_image_tags(image, tags) do
+      {:ok, Onagal.Images.get_image_with_tags(image.id)}
+    else
+      error ->
+        error
+    end
+  end
+
+  def upsert_image_tags_by_name(image, tag_names) when is_list(tag_names) do
+    tags = list_tags_by_name(tag_names)
+
+    with {:ok, _struct} <- update_image_tags(image, tags) do
       {:ok, Onagal.Images.get_image_with_tags(image.id)}
     else
       error ->
