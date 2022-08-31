@@ -7,7 +7,7 @@ A basic image management system consisting of several parts:
 - onagal: [75%] Data-store is a PostgreSQL database, along with an ecto interface to the data. Other utility modules may go here 
 as well.
 
-- onagal_web: [15%] Web front-end (early rough-out) allow images with static tags (and possibly KV tags in the future) and
+- onagal_web: [20%] Web front-end (early rough-out) allow images with static tags (and possibly KV tags in the future) and
 a matching "gallery" system allow groups of tags to be saved into a "gallery" as preset filters for slide show presentations.
 
 - onagal_fs: [80%] Filesystem importer (WIP). An elixir process that uses inotify filesystem events to watch 
