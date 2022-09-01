@@ -1,4 +1,8 @@
 defmodule Onagal.Fs.Crawl do
+  @doc """
+    Given a path,
+      Call into recurse_paths converting the path to a 1-item list
+  """
   def recurse_path(""), do: []
 
   def recurse_path(path) when is_binary(path) do
@@ -7,6 +11,12 @@ defmodule Onagal.Fs.Crawl do
 
   def recurse_path(_), do: []
 
+  @doc """
+    Given a list of paths,
+      recurse the path
+      recurse any subdirectories
+      return a list of all files found
+  """
   def recurse_paths(paths), do: recurse_paths(paths, [])
   def recurse_paths(paths, _) when not is_list(paths), do: []
   def recurse_paths(_, acc) when not is_list(acc), do: []
@@ -17,7 +27,7 @@ defmodule Onagal.Fs.Crawl do
       paths
       |> Enum.filter(fn path -> File.dir?(path) end)
       |> Task.async_stream(fn path -> map_files(path) end, timeout: 15000)
-      |> Enum.into([], fn {:ok, res} -> res end)
+      |> Enum.into(acc, fn {:ok, res} -> res end)
       |> List.flatten()
 
     # This is the non-concurrency approach. somewhat (but not significantly) slower
@@ -29,6 +39,11 @@ defmodule Onagal.Fs.Crawl do
     recurse_paths(dirs, acc ++ files)
   end
 
+  @doc """
+    Given a list of files
+      create a list of {path, file_stat} tuples
+      filter any that do not have file_stat info (special files, dangling symlinks, etc)
+  """
   defp map_files(path) when not is_binary(path), do: []
 
   defp map_files(path) do
@@ -49,6 +64,13 @@ defmodule Onagal.Fs.Crawl do
     end)
   end
 
+  @doc """
+    Given a list of file path entries
+      Gather a list of files (type == regular)
+      Gather a list of directories (type == directory)
+      return {dirs, files}
+      ignore everything else
+  """
   defp partition_path_entries([]), do: {[], []}
 
   defp partition_path_entries(file_list) do
