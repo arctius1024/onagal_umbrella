@@ -2,6 +2,7 @@ defmodule OnagalWeb.GalleryLive.Index do
   use OnagalWeb, :live_view
 
   alias Onagal.Images
+  alias Onagal.Tags
   alias Onagal.Paginate
 
   @impl true
@@ -27,6 +28,8 @@ defmodule OnagalWeb.GalleryLive.Index do
       socket
       |> assign(:tag_filter, tag_filter)
       |> assign(:tag_list, tag_list)
+      |> assign(:image_tags, Map.get(socket.assigns, :image_tags, []))
+      |> assign(:selected_images, Map.get(socket.assigns, :selected_images, []))
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -45,7 +48,7 @@ defmodule OnagalWeb.GalleryLive.Index do
   defp apply_action(socket, :show, %{"id" => id} = params) do
     IO.puts("apply_action :show")
 
-    image = Images.get_image!(id)
+    image = Images.get_image_with_tags(id)
     tag_filter = socket.assigns.tag_filter
     images = list_images(params, tag_filter)
 
@@ -61,6 +64,7 @@ defmodule OnagalWeb.GalleryLive.Index do
     |> assign(:prev_image, prev_image)
     |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))
     |> assign(:image_id, image.id)
+    |> assign(:image_tags, list_tags_as_options(image.tags))
   end
 
   # Filter helpers
@@ -86,9 +90,13 @@ defmodule OnagalWeb.GalleryLive.Index do
 
     send_filter_update(:filter, socket.assigns)
 
+    # Remove all images from selected_images on filter change. This could be done
+    # more selectively, but this works for now.
+    socket = socket |> assign(:selected_images, [])
+
     case socket.assigns.live_action do
       :show -> send_filter_update({:show, socket: socket, images: images, image: image})
-      :index -> send_filter_update(:index, {images})
+      :index -> send_filter_update(:index, {images, socket.assigns.selected_images})
     end
 
     PhoenixLiveSession.put_session(socket, "tag_filter", tags)
@@ -96,22 +104,63 @@ defmodule OnagalWeb.GalleryLive.Index do
     {:noreply, socket |> assign(:images, images)}
   end
 
-  defp send_filter_update(:filter, %{tag_filter: tags, tag_list: tag_list} = _assigns) do
+  @impl true
+  def handle_info({:tag_images, [tags: tags, params: params]}, socket) do
+    IO.puts("index handle_info :tag_image")
+
+    Enum.each(socket.assigns.selected_images, fn image_id ->
+      image = Images.get_image_with_tags(image_id)
+      Tags.upsert_image_tags_by_name(image, tags)
+    end)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  @spec handle_event(<<_::96>>, map, any) :: {:noreply, any}
+  def handle_event("select_image", %{"value" => image_id}, socket) do
+    IO.puts("index handle_info select_image")
+    # state = if state == "true", do: true, else: false
+    image_id = String.to_integer(image_id)
+
+    new_selected_images =
+      cond do
+        Enum.any?(socket.assigns.selected_images, fn x -> x == image_id end) ->
+          socket.assigns.selected_images -- [image_id]
+
+        true ->
+          [image_id | socket.assigns.selected_images]
+      end
+
+    socket = socket |> assign(:selected_images, new_selected_images)
+
+    # IO.inspect(socket.assigns.selected_images)
+
+    # story selected image
+    {:noreply, socket}
+  end
+
+  defp send_filter_update(
+         :filter,
+         %{tag_filter: tags, tag_list: tag_list, image_tags: image_tags} = _assigns
+       ) do
     send_update(
       OnagalWeb.GalleryLive.FilterComponent,
       id: "filter",
       tag_filter: tags,
-      tag_list: tag_list
+      tag_list: tag_list,
+      image_tags: image_tags
     )
   end
 
-  defp send_filter_update(:index, {images}) do
+  defp send_filter_update(:index, {images, selected_images}) do
     IO.puts("index send_filter_update 1")
 
     send_update(
       OnagalWeb.GalleryLive.MontageComponent,
       id: "montage",
-      images: images
+      images: images,
+      selected_images: selected_images
     )
   end
 
@@ -144,6 +193,10 @@ defmodule OnagalWeb.GalleryLive.Index do
 
   def get_next_image(params, tag_filter, images, image),
     do: Paginate.get_next_image(params, tag_filter, images, image)
+
+  def list_tags_as_options(image_tags) do
+    Enum.map(image_tags, fn tag -> tag.name end)
+  end
 
   # generic session helper methods
   defp assign_session_filter(socket, session) do
