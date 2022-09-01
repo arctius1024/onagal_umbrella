@@ -31,6 +31,9 @@ defmodule Onagal.Fs do
     {:noreply, state}
   end
 
+  # TODO: This are not really used since the decision was made to rely on inotify
+  # events to handle incoming files rather than the crawler.
+  # ie. CLEANUP / DEPRECATED.
   # This is called from Onagal.Fs.Crawl rather than file_system
   # GenServer.cast(Onagal.Fs, {:bulk_file_event, "/path"})
   def handle_cast({:bulk_file_add_event, path}, state) do
@@ -51,6 +54,12 @@ defmodule Onagal.Fs do
     {:noreply, state}
   end
 
+  @doc """
+    Given a (managed) file path
+      Attempt to remove file info from teh DB
+      if successful, attempt to remove file from the filesystem
+  """
+  @spec cleanup_file(any) :: false | {:error, :file_remove_failed} | {:ok, :file_removed}
   def cleanup_file(fpath) when is_binary(fpath) do
     IO.puts("handling file removed event for #{fpath}")
 
@@ -65,6 +74,13 @@ defmodule Onagal.Fs do
 
   def cleanup_file(_), do: false
 
+  @doc """
+    Given a non-managed file path
+      Verify the file is an image
+      Gather file_stat info
+      Migrate the file to it's managed location/name
+      Persist the file's new data to the database
+  """
   defp file_added(fpath) when is_binary(fpath) do
     IO.puts("handling file added event for #{fpath}")
 
@@ -82,6 +98,10 @@ defmodule Onagal.Fs do
 
   defp file_added(_), do: false
 
+  @doc """
+    Given a managed file path
+      If tile is an image, remove the file's info from the database.
+  """
   defp file_removed(fpath) when is_binary(fpath) do
     IO.puts("handling file removed event for #{fpath}")
 
