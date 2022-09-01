@@ -14,7 +14,7 @@ defmodule Onagal.Images.Image do
 
     ## TODO: on_replace may be wrong
     # , on_replace: :delete
-    many_to_many(:tags, Onagal.Tags.Tag, join_through: "images_tags")
+    many_to_many(:tags, Onagal.Tags.Tag, join_through: "images_tags", on_replace: :delete)
   end
 
   @required_fields ~w(current_name original_name location)a

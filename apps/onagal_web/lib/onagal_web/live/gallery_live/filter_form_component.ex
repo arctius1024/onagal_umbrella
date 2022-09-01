@@ -5,7 +5,8 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
 
   @impl true
   def update(
-        %{id: "filter", tag_filter: tag_filter, tag_list: tag_list, enabled: enabled} = _assigns,
+        %{id: "filter", tag_filter: tag_filter, tag_list: tag_list, image_tags: image_tags} =
+          _assigns,
         socket
       )
       when is_list(tag_list) do
@@ -13,15 +14,7 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
       socket
       |> assign(:tag_filter, tag_filter)
       |> assign(:tag_list, tag_list)
-      |> assign(:enabled, enabled)
-
-    {:ok, socket}
-  end
-
-  def update(assigns, socket) do
-    socket =
-      socket
-      |> assign(assigns)
+      |> assign(:image_tags, image_tags)
 
     {:ok, socket}
   end
@@ -38,15 +31,26 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
           <%= label f, :tags %>
           <%= multiple_select f, :tags, @tag_list, selected: @tag_filter %>
 
-          <%= if true do %>
-            <%= label f, :submit %>
-            <%= submit "Filter" %>
-          <% end %>
+          <%= label f, :submit %>
+          <%= submit "Filter" %>
+      </.form>
+
+      <.form let={f}
+        for={:tag_image}
+        phx-submit="tag"
+        phx-target={@myself}
+      >
+        <%= label f, :tags %>
+        <%= multiple_select f, :tags, @tag_list, selected: @image_tags %>
+
+        <%= label f, :submit %>
+        <%= submit "Tag" %>
       </.form>
     </div>
     """
   end
 
+  # Filtering here
   @impl true
   def handle_event("filter", %{"tag_filter" => %{"tags" => tags}} = params, socket) do
     IO.puts("filter_form handle_event filter 1")
@@ -63,10 +67,34 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
   end
 
   defp handle_filter_event(params, socket, tags) do
-    IO.inspect(tags)
+    IO.puts("filter_form handle_filter_event")
 
     send(self(), {:tag_filter, tags: tags, params: params})
 
     socket |> assign(:tag_filter, tags)
+  end
+
+  # Tagging here
+  @impl true
+  def handle_event("tag", %{"tag_image" => %{"tags" => tags}} = params, socket) do
+    IO.puts("filter_form handle_event tag 1")
+
+    {:noreply, handle_tag_event(params, socket, tags)}
+  end
+
+  @impl true
+  def handle_event("tag", params, socket) do
+    IO.puts("filter_form handle_event tag 2")
+    tags = []
+
+    {:noreply, handle_tag_event(params, socket, tags)}
+  end
+
+  defp handle_tag_event(params, socket, tags) do
+    IO.puts("filter_form handle_tag_event")
+
+    send(self(), {:tag_images, tags: tags, params: params})
+
+    socket |> assign(:tag_image, tags)
   end
 end

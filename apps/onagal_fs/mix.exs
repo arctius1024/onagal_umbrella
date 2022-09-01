@@ -18,7 +18,7 @@ defmodule Onagal.Fs.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :file_system],
+      extra_applications: [:logger, :file_system, :onagal],
       mod: {Onagal.Fs.Application, []}
     ]
   end
