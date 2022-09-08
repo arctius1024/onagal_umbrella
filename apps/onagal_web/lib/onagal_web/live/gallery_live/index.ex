@@ -105,7 +105,7 @@ defmodule OnagalWeb.GalleryLive.Index do
   end
 
   @impl true
-  def handle_info({:tag_images, [tags: tags, params: params]}, socket) do
+  def handle_info({:tag_images, [tags: tags, params: _params]}, socket) do
     IO.puts("index handle_info :tag_image")
 
     Enum.each(socket.assigns.selected_images, fn image_id ->
