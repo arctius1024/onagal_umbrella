@@ -117,10 +117,16 @@ defmodule OnagalWeb.GalleryLive.Index do
   end
 
   @impl true
+  def handle_event("clear_selections", %{"value" => "clear"}, socket) do
+    IO.puts("index handle_event clear_selections")
+
+    {:noreply, socket |> assign(:selected_images, [])}
+  end
+
+  @impl true
   @spec handle_event(<<_::96>>, map, any) :: {:noreply, any}
   def handle_event("select_image", %{"value" => image_id}, socket) do
-    IO.puts("index handle_info select_image")
-    # state = if state == "true", do: true, else: false
+    IO.puts("index handle_event select_image")
     image_id = String.to_integer(image_id)
 
     new_selected_images =
@@ -136,7 +142,6 @@ defmodule OnagalWeb.GalleryLive.Index do
 
     # IO.inspect(socket.assigns.selected_images)
 
-    # story selected image
     {:noreply, socket}
   end
 
