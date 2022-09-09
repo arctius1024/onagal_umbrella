@@ -43,8 +43,11 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
         <%= label f, :tags %>
         <%= multiple_select f, :tags, @tag_list, selected: @image_tags %>
 
+        <%= label f, :replace %>
+        <%= checkbox f, :add_replace %>
+
         <%= label f, :submit %>
-        <%= submit "Tag" %>
+        <%= submit "Tag"%>
       </.form>
 
       <button
@@ -84,24 +87,30 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
 
   # Tagging here
   @impl true
-  def handle_event("tag", %{"tag_image" => %{"tags" => tags}} = params, socket) do
+  def handle_event(
+        "tag",
+        %{"tag_image" => %{"tags" => tags, "add_replace" => add_replace}} = params,
+        socket
+      ) do
     IO.puts("filter_form handle_event tag 1")
+    mode = if add_replace == "true", do: :replace, else: :add
 
-    {:noreply, handle_tag_event(params, socket, tags)}
+    {:noreply, handle_tag_event(params, socket, tags, mode)}
   end
 
   @impl true
-  def handle_event("tag", params, socket) do
+  def handle_event("tag", %{"tag_image" => %{"add_replace" => add_replace}} = params, socket) do
     IO.puts("filter_form handle_event tag 2")
     tags = []
+    mode = if add_replace == "true", do: :replace, else: :add
 
-    {:noreply, handle_tag_event(params, socket, tags)}
+    {:noreply, handle_tag_event(params, socket, tags, mode)}
   end
 
-  defp handle_tag_event(params, socket, tags) do
+  defp handle_tag_event(params, socket, tags, mode) do
     IO.puts("filter_form handle_tag_event")
 
-    send(self(), {:tag_images, tags: tags, params: params})
+    send(self(), {:tag_images, tags: tags, mode: mode, params: params})
 
     socket |> assign(:tag_image, tags)
   end
