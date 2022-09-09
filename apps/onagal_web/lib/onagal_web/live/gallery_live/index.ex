@@ -52,7 +52,7 @@ defmodule OnagalWeb.GalleryLive.Index do
     tag_filter = socket.assigns.tag_filter
     images = list_images(params, tag_filter)
 
-    {page, images} = Paginate.find_image_page(images, tag_filter, image)
+    {_page, images} = Paginate.find_image_page(images, tag_filter, image)
 
     # Since we ensure we have the correct image page above, we shouldn't
     # have an issue being more than a page off.
@@ -105,12 +105,21 @@ defmodule OnagalWeb.GalleryLive.Index do
   end
 
   @impl true
-  def handle_info({:tag_images, [tags: tags, params: _params]}, socket) do
+  def handle_info({:tag_images, [tags: tags, mode: mode, params: _params]}, socket) do
     IO.puts("index handle_info :tag_image")
 
     Enum.each(socket.assigns.selected_images, fn image_id ->
       image = Images.get_image_with_tags(image_id)
-      Tags.upsert_image_tags_by_name(image, tags)
+
+      case mode do
+        :replace ->
+          Tags.upsert_image_tags_by_name(image, tags)
+
+        :add ->
+          Enum.each(tags, fn tag ->
+            Tags.add_tag_to_image(image, tag)
+          end)
+      end
     end)
 
     {:noreply, socket}

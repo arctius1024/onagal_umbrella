@@ -9,7 +9,8 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
           prev_image: prev_image,
           next_image: next_image,
           image_path: image_path,
-          image_id: image_id
+          image_id: image_id,
+          image_tags: image_tags
         } = _assigns,
         socket
       ) do
@@ -20,6 +21,7 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
       |> assign(:prev_image, prev_image)
       |> assign(:next_image, next_image)
       |> assign(:image_path, image_path)
+      |> assign(:image_tags, image_tags)
       |> assign(:image_id, image_id)
 
     {:ok, socket}
@@ -46,6 +48,13 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
         </tr>
       </table>
       <img src={@image_path} style="width: 25vw; min-width: 320px;">
+      <div>
+        <ul class="imglist">
+        <%= for image_tag <- @image_tags do %>
+          <li><%= image_tag %></li>
+        <% end %>
+        </ul>
+      </div>
     </ul>
     """
   end

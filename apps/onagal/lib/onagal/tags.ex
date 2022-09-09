@@ -68,11 +68,11 @@ defmodule Onagal.Tags do
     |> Repo.update()
   end
 
-  def add_tag_to_image(image, tag_name) when is_binary(tag_name),
-    do: add_tag_to_image(image, get_tag_by_name(tag_name))
-
   def add_tag_to_image(image, tag_id) when is_integer(tag_id),
     do: add_tag_to_image(image, get_tag!(tag_id))
+
+  def add_tag_to_image(image, tag_name) when is_binary(tag_name),
+    do: add_tag_to_image(image, get_tag_by_name(tag_name))
 
   def add_tag_to_image(image, tag) do
     image
