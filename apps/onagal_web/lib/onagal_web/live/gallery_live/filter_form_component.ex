@@ -46,6 +46,14 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
         <%= label f, :submit %>
         <%= submit "Tag" %>
       </.form>
+
+      <button
+        type="button"
+        phx-click="clear_selections"
+        value="clear"
+      >
+        Clear Selections
+      </button>
     </div>
     """
   end
