@@ -7,7 +7,7 @@
       <.live_component module={OnagalWeb.GalleryLive.MontageComponent} id="montage" images={@images} selected_images={@selected_images} />
     <% else %>
       <.live_component module={OnagalWeb.GalleryLive.DisplayComponent} id="display"
-        image_id={@image_id} prev_image={@prev_image} next_image={@next_image} image_path={@image_path} image_tags={@image_tags} />
+        image_id={@image_id} prev_image={@prev_image} next_image={@next_image} image_path={@image_path} itags={@itags} />
     <% end %>
   </div>
 </div>

@@ -65,6 +65,7 @@ defmodule OnagalWeb.GalleryLive.Index do
     |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))
     |> assign(:image_id, image.id)
     |> assign(:image_tags, list_tags_as_options(image.tags))
+    |> assign(:itags, list_tags_as_options(image.tags))
   end
 
   # Filter helpers
@@ -106,21 +107,31 @@ defmodule OnagalWeb.GalleryLive.Index do
 
   @impl true
   def handle_info({:tag_images, [tags: tags, mode: mode, params: _params]}, socket) do
-    IO.puts("index handle_info :tag_image")
+    IO.puts("index handle_info :tag_images")
 
-    Enum.each(socket.assigns.selected_images, fn image_id ->
-      image = Images.get_image_with_tags(image_id)
-
-      case mode do
-        :replace ->
-          Tags.upsert_image_tags_by_name(image, tags)
-
-        :add ->
-          Enum.each(tags, fn tag ->
-            Tags.add_tag_to_image(image, tag)
+    socket =
+      case socket.assigns.live_action do
+        :index ->
+          Enum.each(socket.assigns.selected_images, fn image_id ->
+            image = Images.get_image_with_tags(image_id)
+            retag_image(image, mode, tags)
           end)
+
+          socket
+
+        :show ->
+          image = Images.get_image_with_tags(socket.assigns.image_id)
+          retag_image(image, mode, tags)
+          image = image |> Onagal.Repo.preload(:tags, force: true)
+
+          send_update(
+            OnagalWeb.GalleryLive.DisplayComponent,
+            id: "display",
+            itags: list_tags_as_options(image.tags)
+          )
+
+          socket
       end
-    end)
 
     {:noreply, socket}
   end
@@ -154,6 +165,7 @@ defmodule OnagalWeb.GalleryLive.Index do
     {:noreply, socket}
   end
 
+  # TODO: should these be more genericized (accept and pass on arbitrary parameters?)
   defp send_filter_update(
          :filter,
          %{tag_filter: tags, tag_list: tag_list, image_tags: image_tags} = _assigns
@@ -185,6 +197,7 @@ defmodule OnagalWeb.GalleryLive.Index do
       OnagalWeb.GalleryLive.DisplayComponent,
       id: "display",
       image_id: image.id,
+      itags: image.tags,
       prev_image: Images.next_image_on_page(images, image),
       next_image: Images.prev_image_on_page(images, image),
       image_path: Routes.static_path(socket, Images.web_image_path(image))
@@ -213,6 +226,18 @@ defmodule OnagalWeb.GalleryLive.Index do
   end
 
   # generic session helper methods
+  def retag_image(image, mode, tags) when is_list(tags) do
+    case mode do
+      :replace ->
+        Tags.upsert_image_tags_by_name(image, tags)
+
+      :add ->
+        Enum.each(tags, fn tag ->
+          Tags.add_tag_to_image(image, tag)
+        end)
+    end
+  end
+
   defp assign_session_filter(socket, session) do
     socket
     |> assign(:tag_filter, get_session_filter(session))

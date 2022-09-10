@@ -10,21 +10,23 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
           next_image: next_image,
           image_path: image_path,
           image_id: image_id,
-          image_tags: image_tags
+          itags: itags
         } = _assigns,
         socket
       ) do
-    IO.puts("display update")
-
     socket =
       socket
       |> assign(:prev_image, prev_image)
       |> assign(:next_image, next_image)
       |> assign(:image_path, image_path)
-      |> assign(:image_tags, image_tags)
+      |> assign(:itags, itags)
       |> assign(:image_id, image_id)
 
     {:ok, socket}
+  end
+
+  def update(%{id: "display", itags: itags} = _assigns, socket) do
+    {:ok, socket |> assign(:itags, itags)}
   end
 
   def render(assigns) do
@@ -50,7 +52,7 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
       <img src={@image_path} style="width: 25vw; min-width: 320px;">
       <div>
         <ul class="imglist">
-        <%= for image_tag <- @image_tags do %>
+        <%= for image_tag <- @itags do %>
           <li><%= image_tag %></li>
         <% end %>
         </ul>
