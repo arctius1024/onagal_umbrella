@@ -16,10 +16,10 @@ defmodule OnagalWeb.TagsetLiveTest do
   describe "Index" do
     setup [:create_tagset]
 
-    test "lists all tagsets", %{conn: conn} do
+    test "lists all tagset", %{conn: conn} do
       {:ok, _index_live, html} = live(conn, Routes.tagset_index_path(conn, :index))
 
-      assert html =~ "Listing Tagsets"
+      assert html =~ "Listing Tagset"
     end
 
     test "saves new tagset", %{conn: conn} do

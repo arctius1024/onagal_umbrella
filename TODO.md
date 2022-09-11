@@ -11,6 +11,13 @@ X make add/replace selectable when tagging in montage
 X allow tagging to work properly when in :show
 X tagging while in :show does not refresh tag list
 
+X Add in UI ability to create tagsets
+  X Show should work
+  X New should work
+  X Edit Should work
+  X All of the above should also show associated tags (initially in "ugly" format)
+
+- Make "tags" displays "pretty" (in tagsets/tags/images)
 - switching filters in show works but displays the wrong image relative to the :id
 - cleanup send_*_update functions in GalleryLive/index.ex
 - Refactoring pass on onagal_fs, its a rats nest in there
