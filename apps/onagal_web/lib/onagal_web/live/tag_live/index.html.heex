@@ -23,12 +23,9 @@
   <tbody id="tags">
     <%= for tag <- @tags do %>
       <tr id={"tag-#{tag.id}"}>
-        <td>
-          <span><%= tag.name %></span>
-          <span><%= live_redirect "Show", to: Routes.tag_show_path(@socket, :show, tag) %></span>
-          <span><%= live_patch "Edit", to: Routes.tag_index_path(@socket, :edit, tag) %></span>
-          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: tag.id, data: [confirm: "Are you sure?"] %></span>
-        </td>
+        <td><%= tag.name %></td>
+        <td><%= live_patch "Edit", to: Routes.tag_index_path(@socket, :edit, tag) %></td>
+        <td><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: tag.id, data: [confirm: "Are you sure?"] %></td>
       </tr>
     <% end %>
   </tbody>

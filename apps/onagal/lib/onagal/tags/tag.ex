@@ -9,9 +9,9 @@ defmodule Onagal.Tags.Tag do
 
     ## TODO: on_replace may be wrong
     # , on_replace: :delete
-    many_to_many(:images, Onagal.Images.Image, join_through: "images_tags")
+    many_to_many(:images, Onagal.Images.Image, join_through: "images_tags", on_replace: :delete)
     # , on_replace: :delete
-    many_to_many(:tagsets, Onagal.Tags.Tagset, join_through: "tags_tagsets")
+    many_to_many(:tagsets, Onagal.Tags.Tagset, join_through: "tags_tagsets", on_replace: :delete)
   end
 
   @doc false

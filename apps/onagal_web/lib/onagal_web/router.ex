@@ -113,6 +113,17 @@ defmodule OnagalWeb.Router do
     live "/:id/show/edit", TagLive.Show, :edit
   end
 
+  scope "/tagsets", OnagalWeb do
+    pipe_through([:browser, :require_authenticated_user])
+
+    live "/", TagsetLive.Index, :index
+    live "/new", TagsetLive.Index, :new
+    live "/:id/edit", TagsetLive.Index, :edit
+
+    live "/:id", TagsetLive.Show, :show
+    live "/:id/show/edit", TagsetLive.Show, :edit
+  end
+
   scope "/test", OnagalWeb do
     pipe_through([:browser, :require_authenticated_user])
 

@@ -50,7 +50,8 @@ defmodule Onagal.Tags do
     |> Repo.all()
   end
 
-  def list_tags_by_name(tag_names) do
+  @spec list_tags_by_name(any) :: any
+  def list_tags_by_name(tag_names) when is_list(tag_names) do
     Tag
     |> where([tag], tag.name in ^tag_names)
     |> Repo.all()
@@ -131,9 +132,16 @@ defmodule Onagal.Tags do
   end
 
   def delete_tagset(%Tagset{} = tagset) do
-    Repo.delete(tagset)
+    tagset
+    |> Onagal.Repo.preload(:tags)
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:tags, [])
+    |> Repo.update!()
+    |> Repo.delete()
   end
 
+  @spec update_tagset_tags(nil | [%{optional(atom) => any}] | %{optional(atom) => any}, any) ::
+          any
   def update_tagset_tags(tagset, tags) do
     tagset
     |> Repo.preload(:tags)
