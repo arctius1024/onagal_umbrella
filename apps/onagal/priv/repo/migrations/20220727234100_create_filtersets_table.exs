@@ -4,6 +4,7 @@ defmodule Onagal.Persist.Repo.Migrations.CreateFiltersetsTable do
   def change do
     create table(:filtersets) do
       add :name, :string
+      add :description, :string
 
       timestamps()
     end

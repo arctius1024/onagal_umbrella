@@ -18,8 +18,6 @@ defmodule Onagal.Tags.Tagset do
   @doc false
   def changeset(tagset, attrs) do
     IO.puts("tagset :changeset")
-    IO.inspect(tagset)
-    IO.inspect(attrs)
 
     tagset =
       tagset
