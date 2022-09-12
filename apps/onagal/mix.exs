@@ -42,6 +42,7 @@ defmodule Onagal.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:thumbnex, "~> 0.4.0"},
       {:scrivener_ecto, "~> 2.7"},
+      {:ecto_psql_extras, "~> 0.7"},
       {:jason, "~> 1.2"},
       {:swoosh, "~> 1.3"}
     ]
