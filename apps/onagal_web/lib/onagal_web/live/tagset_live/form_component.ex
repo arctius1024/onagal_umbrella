@@ -26,8 +26,6 @@ defmodule OnagalWeb.TagsetLive.FormComponent do
       |> Tags.change_tagset(tagset_params)
       |> Map.put(:action, :validate)
 
-    IO.puts("post-changeset")
-
     {:noreply, assign(socket, :changeset, changeset)}
   end
 

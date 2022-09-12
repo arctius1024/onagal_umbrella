@@ -124,6 +124,17 @@ defmodule OnagalWeb.Router do
     live "/:id/show/edit", TagsetLive.Show, :edit
   end
 
+  scope "/filtersets", OnagalWeb do
+    pipe_through([:browser, :require_authenticated_user])
+
+    live "", FiltersetLive.Index, :index
+    live "/new", FiltersetLive.Index, :new
+    live "/:id/edit", FiltersetLive.Index, :edit
+
+    live "/:id", FiltersetLive.Show, :show
+    live "/:id/show/edit", FiltersetLive.Show, :edit
+  end
+
   scope "/test", OnagalWeb do
     pipe_through([:browser, :require_authenticated_user])
 
