@@ -1,0 +1,28 @@
+<div>
+  <h2><%= @title %></h2>
+
+  <.form
+    let={f}
+    for={@changeset}
+    id="filterset-form"
+    phx-target={@myself}
+    phx-submit="save">
+  
+    <div>
+      <%= label f, :id %>
+      <%= text_input f, :id, disabled: true %>
+
+      <%= label f, :name %>
+      <%= text_input f, :name %>
+
+      <%= label f, :description %>
+      <%= textarea f, :description %>
+
+      <%= label f, :tags %>
+      <%= multiple_select f, :tags, @tag_list, selected: @selected_tags %>
+
+      <%= label f, :submit %>
+      <%= submit "Save", phx_disable_with: "Saving..." %>
+    </div>
+  </.form>
+</div>

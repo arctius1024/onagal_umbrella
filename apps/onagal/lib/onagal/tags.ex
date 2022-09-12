@@ -179,7 +179,12 @@ defmodule Onagal.Tags do
   end
 
   def delete_filterset(%Filterset{} = filterset) do
-    Repo.delete(filterset)
+    filterset
+    |> Onagal.Repo.preload(:tags)
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:tags, [])
+    |> Repo.update!()
+    |> Repo.delete()
   end
 
   def update_filterset_tags(filterset, tags) do
