@@ -1,0 +1,40 @@
+<h1>Listing Filterset</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <.modal return_to={Routes.filterset_index_path(@socket, :index)}>
+    <.live_component
+      module={OnagalWeb.FiltersetLive.FormComponent}
+      id={@filterset.id || :new}
+      title={@page_title}
+      action={@live_action}
+      filterset={@filterset}
+      tag_list={@tag_list}
+      selected_tags={@selected_tags}
+      return_to={Routes.filterset_index_path(@socket, :index)}
+    />
+  </.modal>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="filterset">
+    <%= for filterset <- @filterset_collection do %>
+      <tr id={"filterset-#{filterset.id}"}>
+
+        <td>
+          <span><%= filterset.name %></span>
+          <span><%= live_redirect "Show", to: Routes.filterset_show_path(@socket, :show, filterset) %></span>
+          <span><%= live_patch "Edit", to: Routes.filterset_index_path(@socket, :edit, filterset) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: filterset.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New Filterset", to: Routes.filterset_index_path(@socket, :new) %></span>

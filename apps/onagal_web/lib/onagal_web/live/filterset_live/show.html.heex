@@ -1,0 +1,28 @@
+<h1>Show Filterset</h1>
+
+<%= if @live_action in [:edit] do %>
+  <.modal return_to={Routes.filterset_show_path(@socket, :show, @filterset)}>
+    <.live_component
+      module={OnagalWeb.FiltersetLive.FormComponent}
+      id={@filterset.id}
+      title={@page_title}
+      action={@live_action}
+      filterset={@filterset}
+      tag_list={@tag_list}
+      selected_tags={@selected_tags}
+      return_to={Routes.filterset_show_path(@socket, :show, @filterset)}
+    />
+  </.modal>
+<% end %>
+
+<ul>
+  <li>ID: <%= @filterset.id %></li>
+  <li>Name: <%= @filterset.name %></li>
+  <li>Description: <%= @filterset.description %></li>
+  <%= for tag <- @filterset.tags do %>
+    <li>Tag: <%= tag.name %></li>
+  <% end %>
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.filterset_show_path(@socket, :edit, @filterset), class: "button" %></span> |
+<span><%= live_redirect "Back", to: Routes.filterset_index_path(@socket, :index) %></span>
