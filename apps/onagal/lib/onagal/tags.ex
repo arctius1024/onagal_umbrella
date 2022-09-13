@@ -115,6 +115,13 @@ defmodule Onagal.Tags do
 
   def get_tagset!(id), do: Repo.get!(Tagset, id)
 
+  def list_tags_by_tagset_name(tagset) when is_binary(tagset) do
+    case tagset = Repo.get_by(Tagset, name: tagset) |> Repo.preload(:tags) do
+      nil -> []
+      _ -> tagset.tags
+    end
+  end
+
   def create_tagset(attrs \\ %{}) do
     %Tagset{}
     |> Tagset.changeset(attrs)
@@ -161,6 +168,13 @@ defmodule Onagal.Tags do
   end
 
   def get_filterset!(id), do: Repo.get!(Filterset, id)
+
+  def list_tags_by_filterset_name(filterset) when is_binary(filterset) do
+    case filterset = Repo.get_by(Filterset, name: filterset) |> Repo.preload(:tags) do
+      nil -> []
+      _ -> filterset.tags
+    end
+  end
 
   def create_filterset(attrs \\ %{}) do
     %Filterset{}

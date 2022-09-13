@@ -1,0 +1,64 @@
+<div>
+    <button
+        type="button"
+        phx-click="clear_selections"
+        value="clear"
+    >
+    Clear Selections
+    </button>
+
+    <hr/>
+
+    <.form let={f}
+        for={:tag_filter}
+        phx-submit="filter"
+        phx-target={@myself}
+    >
+        <%= label f, :tags %>
+        <%= multiple_select f, :tags, @tag_list, selected: @tag_filter %>
+
+        <%= label f, :reset %>
+        <%= reset "Reset" %>
+
+        <%= label f, :submit %>
+        <%= submit "Filter" %>
+    </.form>
+
+    <.form let={f}
+      for={:filterset}
+      phx-submit="filterset"
+      phx-target={@myself}
+    >
+        <%= label f, :filterset %>
+        <%= select f, :select_filterset, @filterset_list, phx_change: "filterset_select" %>
+    </.form>
+
+    <hr/>
+
+    <.form let={f}
+        for={:tag_image}
+        phx-submit="tag"
+        phx-target={@myself}
+        >
+        <%= label f, :tags %>
+        <%= multiple_select f, :tags, @tag_list, selected: @image_tags %>
+
+        <%= label f, :replace %>
+        <%= checkbox f, :add_replace %>
+
+        <%= label f, :reset %>
+        <%= reset "Reset" %>
+
+        <%= label f, :submit %>
+        <%= submit "Tag"%>
+    </.form>
+
+    <.form let={f}
+      for={:tagset}
+      phx-submit="tagset"
+      phx-target={@myself}
+    >
+        <%= label f, :tagset %>
+        <%= select f, :select_tagset, @tagset_list, phx_change: "tagset_select" %>
+    </.form>
+</div>

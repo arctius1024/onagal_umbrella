@@ -22,6 +22,9 @@
   - ~~New should work~~
   - ~~Edit Should work~~
 
+- ~~Add ability to "apply" a tagset to the active list of tags~~
+- ~~Add ability to "apply" a filterset to active list of tag filters~~
+
 - Make "tags" displays "pretty" (in tagsets/tags/images)
 - switching filters in show works but displays the wrong image relative to the :id
 - cleanup send_*_update functions in GalleryLive/index.ex
