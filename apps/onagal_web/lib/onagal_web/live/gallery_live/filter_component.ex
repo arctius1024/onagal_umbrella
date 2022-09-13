@@ -1,7 +1,7 @@
 defmodule OnagalWeb.GalleryLive.FilterComponent do
   use OnagalWeb, :live_component
 
-  # alias Onagal.Images
+  alias Onagal.Tags
 
   @impl true
   def update(
@@ -15,50 +15,10 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
       |> assign(:tag_filter, tag_filter)
       |> assign(:tag_list, tag_list)
       |> assign(:image_tags, image_tags)
+      |> assign(:tagset_list, list_tagsets)
+      |> assign(:filterset_list, list_filtersets)
 
     {:ok, socket}
-  end
-
-  @impl true
-  def render(assigns) do
-    ~H"""
-    <div>
-      <.form let={f}
-          for={:tag_filter}
-          phx-submit="filter"
-          phx-target={@myself}
-      >
-          <%= label f, :tags %>
-          <%= multiple_select f, :tags, @tag_list, selected: @tag_filter %>
-
-          <%= label f, :submit %>
-          <%= submit "Filter" %>
-      </.form>
-
-      <.form let={f}
-        for={:tag_image}
-        phx-submit="tag"
-        phx-target={@myself}
-      >
-        <%= label f, :tags %>
-        <%= multiple_select f, :tags, @tag_list, selected: @image_tags %>
-
-        <%= label f, :replace %>
-        <%= checkbox f, :add_replace %>
-
-        <%= label f, :submit %>
-        <%= submit "Tag"%>
-      </.form>
-
-      <button
-        type="button"
-        phx-click="clear_selections"
-        value="clear"
-      >
-        Clear Selections
-      </button>
-    </div>
-    """
   end
 
   # Filtering here
@@ -83,6 +43,33 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
     send(self(), {:tag_filter, tags: tags, params: params})
 
     socket |> assign(:tag_filter, tags)
+  end
+
+  # Filterset here
+  def handle_event(
+        "filterset_select",
+        %{"filterset" => %{"select_filterset" => filterset}} = params,
+        socket
+      ) do
+    IO.puts("filter_form handle_event :filterset_select")
+
+    tags = Tags.list_tags_by_filterset_name(filterset)
+
+    {:noreply, handle_filter_event(params, socket, list_tags(tags))}
+  end
+
+  # Tagset here
+  def handle_event(
+        "tagset_select",
+        %{"tagset" => %{"select_tagset" => tagset}} = params,
+        socket
+      ) do
+    IO.puts("tagset_form handle_event :tagset_select")
+
+    tags = Tags.list_tags_by_tagset_name(tagset)
+
+    # {:noreply, handle_tag_event(params, socket, list_tags(tags), :replace)}
+    {:noreply, socket |> assign(:image_tags, list_tags(tags))}
   end
 
   # Tagging here
@@ -113,5 +100,17 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
     send(self(), {:tag_images, tags: tags, mode: mode, params: params})
 
     socket |> assign(:tag_image, tags)
+  end
+
+  defp list_tags(tags) do
+    Enum.map(tags, fn tag -> tag.name end)
+  end
+
+  defp list_tagsets do
+    Enum.map(Tags.list_tagsets(), fn tagset -> tagset.name end)
+  end
+
+  defp list_filtersets do
+    Enum.map(Tags.list_filtersets(), fn filterset -> filterset.name end)
   end
 end
