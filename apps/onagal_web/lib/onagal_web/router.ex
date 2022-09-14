@@ -93,7 +93,7 @@ defmodule OnagalWeb.Router do
   scope "/gallery", OnagalWeb do
     pipe_through([:browser, :require_authenticated_user])
 
-    live_session :default do
+    live_session :gallery, on_mount: OnagalWeb.RouteAssigns do
       live("/", GalleryLive.Index, :index)
       live("/:id", GalleryLive.Index, :show)
 
@@ -105,42 +105,39 @@ defmodule OnagalWeb.Router do
   scope "/tags", OnagalWeb do
     pipe_through([:browser, :require_authenticated_user])
 
-    live "/", TagLive.Index, :index
-    live "/new", TagLive.Index, :new
-    live "/:id/edit", TagLive.Index, :edit
+    live_session :tags, on_mount: OnagalWeb.RouteAssigns do
+      live "/", TagLive.Index, :index
+      live "/new", TagLive.Index, :new
+      live "/:id/edit", TagLive.Index, :edit
 
-    live "/:id", TagLive.Show, :show
-    live "/:id/show/edit", TagLive.Show, :edit
+      live "/:id", TagLive.Show, :show
+      live "/:id/show/edit", TagLive.Show, :edit
+    end
   end
 
   scope "/tagsets", OnagalWeb do
     pipe_through([:browser, :require_authenticated_user])
 
-    live "/", TagsetLive.Index, :index
-    live "/new", TagsetLive.Index, :new
-    live "/:id/edit", TagsetLive.Index, :edit
+    live_session :tagsets, on_mount: OnagalWeb.RouteAssigns do
+      live "/", TagsetLive.Index, :index
+      live "/new", TagsetLive.Index, :new
+      live "/:id/edit", TagsetLive.Index, :edit
 
-    live "/:id", TagsetLive.Show, :show
-    live "/:id/show/edit", TagsetLive.Show, :edit
+      live "/:id", TagsetLive.Show, :show
+      live "/:id/show/edit", TagsetLive.Show, :edit
+    end
   end
 
   scope "/filtersets", OnagalWeb do
     pipe_through([:browser, :require_authenticated_user])
 
-    live "", FiltersetLive.Index, :index
-    live "/new", FiltersetLive.Index, :new
-    live "/:id/edit", FiltersetLive.Index, :edit
+    live_session :filtersets, on_mount: OnagalWeb.RouteAssigns do
+      live "/", FiltersetLive.Index, :index
+      live "/new", FiltersetLive.Index, :new
+      live "/:id/edit", FiltersetLive.Index, :edit
 
-    live "/:id", FiltersetLive.Show, :show
-    live "/:id/show/edit", FiltersetLive.Show, :edit
-  end
-
-  scope "/test", OnagalWeb do
-    pipe_through([:browser, :require_authenticated_user])
-
-    live_session :test do
-      live("/", TestLive.Index, :index)
-      live("/:id", TestLive.Index, :show)
+      live "/:id", FiltersetLive.Show, :show
+      live "/:id/show/edit", FiltersetLive.Show, :edit
     end
   end
 end
