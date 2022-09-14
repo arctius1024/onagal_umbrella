@@ -18,7 +18,7 @@ defmodule OnagalWeb.TagsetLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"tagset" => tagset_params} = params, socket) do
+  def handle_event("validate", %{"tagset" => tagset_params} = _params, socket) do
     IO.puts("tagset_form :handle_event :validate")
 
     changeset =
