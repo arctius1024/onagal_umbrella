@@ -7,7 +7,8 @@ defmodule Onagal.Umbrella.MixProject do
       version: "0.1.0",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      compilers: [:unused] ++ Mix.compilers()
     ]
   end
 
@@ -24,7 +25,9 @@ defmodule Onagal.Umbrella.MixProject do
   # Dependencies listed here are available only for this project
   # and cannot be accessed from applications inside the apps/ folder.
   defp deps do
-    []
+    [
+     {:mix_unused, "~> 0.3.0"}
+    ]
   end
 
   # Aliases are shortcuts or tasks specific to the current project.

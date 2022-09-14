@@ -13,6 +13,7 @@ defmodule Onagal.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      compilers: [:unused] ++ Mix.compilers(),
       deps: deps()
     ]
   end
