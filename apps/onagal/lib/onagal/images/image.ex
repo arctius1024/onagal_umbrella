@@ -22,7 +22,7 @@ defmodule Onagal.Images.Image do
   @ui_edit_fields ~w(original_name)a
   # @allowed_file_types
 
-  def changeset(record, params \\ :empty) do
+  def changeset(record, params) do
     record
     |> cast(params, @required_fields ++ @optional_fields)
     |> unique_constraint([:current_name, :location])
@@ -30,7 +30,7 @@ defmodule Onagal.Images.Image do
     |> validate_required(@required_fields)
   end
 
-  def ui_edit_changeset(record, params \\ :empty) do
+  def ui_edit_changeset(record, params) do
     record
     |> cast(params, @ui_edit_fields)
     |> validate_required(@ui_edit_fields)

@@ -14,6 +14,10 @@ defmodule Onagal.Images do
   @managed_web_path "/managed_images"
   @managed_web_thumb_path "/thumbs"
 
+  @doc """
+    Returns a list of all images
+      This isn't normally used - defer to the pagination system
+  """
   def list_images do
     Image |> Repo.all()
   end
@@ -48,25 +52,25 @@ defmodule Onagal.Images do
     Repo.paginate(Image, params)
   end
 
-  def images_summary do
-    from(t in Image, select: {t.current_path, t.location})
-    |> Repo.all()
-  end
+  # def images_summary do
+  #   from(t in Image, select: {t.current_path, t.location})
+  #   |> Repo.all()
+  # end
 
   def get_image!(id), do: Repo.get!(Image, id)
 
   def get_first(), do: Image |> first() |> Repo.one()
 
-  @spec get_prev_image(integer, map) :: any
-  def get_prev_image(id, []) do
-    query =
-      from i in Image,
-        where: i.id < ^id,
-        order_by: [desc: i.id],
-        limit: 1
+  # @spec get_prev_image(integer, map) :: any
+  # def get_prev_image(id, []) do
+  #   query =
+  #     from i in Image,
+  #       where: i.id < ^id,
+  #       order_by: [desc: i.id],
+  #       limit: 1
 
-    Repo.one(query) || get_last_image()
-  end
+  #   Repo.one(query) || get_last_image()
+  # end
 
   @doc """
     FIX: This needs to be refactored to share query basics with the normal index image tag
@@ -88,16 +92,16 @@ defmodule Onagal.Images do
     Repo.one(query) || get_last_image()
   end
 
-  def get_next_image(id, []) do
-    query =
-      from i in Image,
-        where: i.id > ^id,
-        preload: [:tags],
-        order_by: i.id,
-        limit: 1
+  # def get_next_image(id, []) do
+  #   query =
+  #     from i in Image,
+  #       where: i.id > ^id,
+  #       preload: [:tags],
+  #       order_by: i.id,
+  #       limit: 1
 
-    Repo.one(query) || get_first_image()
-  end
+  #   Repo.one(query) || get_first_image()
+  # end
 
   @doc """
     FIX: This needs to be refactored to share query basics with the normal index image tag
@@ -251,9 +255,13 @@ defmodule Onagal.Images do
     Repo.one(query)
   end
 
-  def match_image(size, digest) do
-    Repo.get_by(Image, size: size, digest: digest)
-  end
+  # @doc """
+  #   given a size and digest, return any image that matches
+  #   not used by .Fs but should be?
+  # """
+  # def match_image(size, digest) do
+  #   Repo.get_by(Image, size: size, digest: digest)
+  # end
 
   def full_image_path(image) do
     Path.join(image.location, image.current_name)
