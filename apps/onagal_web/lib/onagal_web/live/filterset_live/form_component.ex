@@ -18,7 +18,7 @@ defmodule OnagalWeb.FiltersetLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"filterset" => filterset_params} = params, socket) do
+  def handle_event("validate", %{"filterset" => filterset_params} = _params, socket) do
     IO.puts("filterset_form :handle_event :validate")
 
     changeset =

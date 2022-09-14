@@ -209,3 +209,32 @@ img.selected {
 img.unselected {
   border: 3px solid #333
 }
+
+/* nav */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #4af;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+}
+
+nav li {
+  padding-left: 1rem;
+}
+
+nav a {
+  text-decoration: none;
+  color: darkblue;
+}
+
+.active {
+  background: #aaa;
+}
+
+/* end nav */

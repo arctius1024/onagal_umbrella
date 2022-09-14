@@ -15,8 +15,8 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
       |> assign(:tag_filter, tag_filter)
       |> assign(:tag_list, tag_list)
       |> assign(:image_tags, image_tags)
-      |> assign(:tagset_list, list_tagsets)
-      |> assign(:filterset_list, list_filtersets)
+      |> assign(:tagset_list, list_tagsets())
+      |> assign(:filterset_list, list_filtersets())
 
     {:ok, socket}
   end
@@ -37,14 +37,6 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
     {:noreply, handle_filter_event(params, socket, tags)}
   end
 
-  defp handle_filter_event(params, socket, tags) do
-    IO.puts("filter_form handle_filter_event")
-
-    send(self(), {:tag_filter, tags: tags, params: params})
-
-    socket |> assign(:tag_filter, tags)
-  end
-
   # Filterset here
   def handle_event(
         "filterset_select",
@@ -61,7 +53,7 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
   # Tagset here
   def handle_event(
         "tagset_select",
-        %{"tagset" => %{"select_tagset" => tagset}} = params,
+        %{"tagset" => %{"select_tagset" => tagset}} = _params,
         socket
       ) do
     IO.puts("tagset_form handle_event :tagset_select")
@@ -94,6 +86,16 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
     {:noreply, handle_tag_event(params, socket, tags, mode)}
   end
 
+  # Filter helper
+  defp handle_filter_event(params, socket, tags) do
+    IO.puts("filter_form handle_filter_event")
+
+    send(self(), {:tag_filter, tags: tags, params: params})
+
+    socket |> assign(:tag_filter, tags)
+  end
+
+  # Tag helper
   defp handle_tag_event(params, socket, tags, mode) do
     IO.puts("filter_form handle_tag_event")
 

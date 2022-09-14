@@ -15,12 +15,6 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
     {:ok, socket}
   end
 
-  # def update(assigns, socket) do
-  #   IO.puts("montagecomponent :update 2")
-
-  #   {:ok, socket}
-  # end
-
   def render(assigns) do
     ~H"""
     <div>
@@ -28,11 +22,10 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
         <%= for image <- @images.entries do %>
           <li>
             <%= live_patch to: Routes.gallery_index_path(@socket, :show, image) do %>
-              <%= if image_is_selected(@selected_images, image) do %>
-                <img id={"image-#{image.id}"} class="selected" src={thumbnail_for_image(image)} alt={image.original_name}>
-              <% else %>
-                <img id={"image-#{image.id}"} class="unselected" src={thumbnail_for_image(image)} alt={image.original_name}>
-              <% end %>
+            <img id={"image-#{image.id}"}
+                 class={image_is_selected(@selected_images, image)}
+                 src={thumbnail_for_image(image)}
+                 alt={image.original_name}>
             <% end %>
 
             <button
@@ -64,7 +57,7 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
   end
 
   defp image_is_selected(images, image) do
-    Enum.any?(images, fn x -> x == image.id end)
+    if Enum.any?(images, fn x -> x == image.id end), do: "selected", else: "unselected"
   end
 
   defp thumbnail_for_image(image) do

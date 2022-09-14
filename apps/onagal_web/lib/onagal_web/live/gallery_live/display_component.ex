@@ -36,7 +36,6 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
     <ul>
       <table>
         <tr>
-          <td><%= live_patch "Back", to: Routes.gallery_index_path(@socket, :index) %></td>
           <%= if @prev_image.id != @image_id do %>
             <td><%= live_patch "Prev", to: Routes.gallery_index_path(@socket, :show, @prev_image.id) %></td>
           <% else %>
@@ -49,7 +48,11 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
           <% end %>
         </tr>
       </table>
-      <img src={@image_path} style="width: 25vw; min-width: 320px;">
+      <div>
+        <%= live_patch to: Routes.gallery_index_path(@socket, :index) do %>
+          <img src={@image_path} style="width: 25vw; min-width: 320px;">
+        <% end %>
+      </div>
       <div>
         <ul class="imglist">
         <%= for image_tag <- @itags do %>

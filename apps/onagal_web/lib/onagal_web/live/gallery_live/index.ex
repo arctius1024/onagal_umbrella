@@ -9,6 +9,8 @@ defmodule OnagalWeb.GalleryLive.Index do
   def mount(_params, session, socket) do
     IO.puts("handle_mount")
 
+    # TODO: Figure out why the **** PhoenixLivesession is needed for the filter
+    # Everything else works without it....
     socket =
       socket
       |> PhoenixLiveSession.maybe_subscribe(session)
@@ -82,17 +84,12 @@ defmodule OnagalWeb.GalleryLive.Index do
     IO.puts("index handle_info :tag_filter")
 
     images = list_images(params, tags)
-
-    image =
-      case images.entries do
-        [] -> Images.get_first()
-        _ -> hd(images.entries)
-      end
+    image = if images.entries == [], do: Images.get_first(), else: hd(images.entries)
 
     send_filter_update(:filter, socket.assigns)
 
-    # Remove all images from selected_images on filter change. This could be done
-    # more selectively, but this works for now.
+    # The logic gets confusing if you change filters while selecting images as you may be unable to see some
+    # of the images that are selected (or unselect them!). Thus we reset the selection queue if you change filters.
     socket = socket |> assign(:selected_images, [])
 
     case socket.assigns.live_action do
@@ -109,29 +106,7 @@ defmodule OnagalWeb.GalleryLive.Index do
   def handle_info({:tag_images, [tags: tags, mode: mode, params: _params]}, socket) do
     IO.puts("index handle_info :tag_images")
 
-    socket =
-      case socket.assigns.live_action do
-        :index ->
-          Enum.each(socket.assigns.selected_images, fn image_id ->
-            image = Images.get_image_with_tags(image_id)
-            retag_image(image, mode, tags)
-          end)
-
-          socket
-
-        :show ->
-          image = Images.get_image_with_tags(socket.assigns.image_id)
-          retag_image(image, mode, tags)
-          image = image |> Onagal.Repo.preload(:tags, force: true)
-
-          send_update(
-            OnagalWeb.GalleryLive.DisplayComponent,
-            id: "display",
-            itags: list_tags_as_options(image.tags)
-          )
-
-          socket
-      end
+    handle_image_tagging(socket.assigns.live_action, tags, mode, socket)
 
     {:noreply, socket}
   end
@@ -158,11 +133,7 @@ defmodule OnagalWeb.GalleryLive.Index do
           [image_id | socket.assigns.selected_images]
       end
 
-    socket = socket |> assign(:selected_images, new_selected_images)
-
-    # IO.inspect(socket.assigns.selected_images)
-
-    {:noreply, socket}
+    {:noreply, socket |> assign(:selected_images, new_selected_images)}
   end
 
   # TODO: should these be more genericized (accept and pass on arbitrary parameters?)
@@ -201,6 +172,25 @@ defmodule OnagalWeb.GalleryLive.Index do
       prev_image: Images.next_image_on_page(images, image),
       next_image: Images.prev_image_on_page(images, image),
       image_path: Routes.static_path(socket, Images.web_image_path(image))
+    )
+  end
+
+  defp handle_image_tagging(:index, tags, mode, socket) do
+    Enum.each(socket.assigns.selected_images, fn image_id ->
+      image = Images.get_image_with_tags(image_id)
+      retag_image(image, mode, tags)
+    end)
+  end
+
+  defp handle_image_tagging(:show, tags, mode, socket) do
+    image = Images.get_image_with_tags(socket.assigns.image_id)
+    retag_image(image, mode, tags)
+    image = image |> Onagal.Repo.preload(:tags, force: true)
+
+    send_update(
+      OnagalWeb.GalleryLive.DisplayComponent,
+      id: "display",
+      itags: list_tags_as_options(image.tags)
     )
   end
 

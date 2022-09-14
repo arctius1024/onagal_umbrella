@@ -36,7 +36,7 @@ defmodule Onagal.Tags do
 
   def update_tag(%Tag{} = tag, attrs) do
     tag
-    |> Tag.changeset(attrs)
+    |> change_tag(attrs)
     |> Repo.update()
   end
 
@@ -88,17 +88,16 @@ defmodule Onagal.Tags do
   def upsert_image_tags_by_id(image, tag_ids) when is_list(tag_ids) do
     tags = list_tags_by_id(tag_ids)
 
-    with {:ok, _struct} <- update_image_tags(image, tags) do
-      {:ok, Onagal.Images.get_image_with_tags(image.id)}
-    else
-      error ->
-        error
-    end
+    upsert_image_tags(image, tags)
   end
 
   def upsert_image_tags_by_name(image, tag_names) when is_list(tag_names) do
     tags = list_tags_by_name(tag_names)
 
+    upsert_image_tags(image, tags)
+  end
+
+  def upsert_image_tags(image, tags) when is_list(tags) do
     with {:ok, _struct} <- update_image_tags(image, tags) do
       {:ok, Onagal.Images.get_image_with_tags(image.id)}
     else
@@ -168,6 +167,8 @@ defmodule Onagal.Tags do
   end
 
   def get_filterset!(id), do: Repo.get!(Filterset, id)
+
+  def get_filterset_with_tags(id), do: Repo.get!(Filterset, id) |> Repo.preload(:tags)
 
   def list_tags_by_filterset_name(filterset) when is_binary(filterset) do
     case filterset = Repo.get_by(Filterset, name: filterset) |> Repo.preload(:tags) do

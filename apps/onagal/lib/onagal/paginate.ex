@@ -3,10 +3,10 @@ defmodule Onagal.Paginate do
   Documentation for `Onagal.Paginate`.
   """
 
-  alias Onagal.Repo
+  # alias Onagal.Repo
   alias Onagal.Images
 
-  import Ecto.Query
+  # import Ecto.Query
 
   @doc """
     Given a list of tags - return the min and max ids associated with that list
