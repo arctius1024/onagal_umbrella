@@ -61,17 +61,6 @@ defmodule Onagal.Images do
 
   def get_first(), do: Image |> first() |> Repo.one()
 
-  # @spec get_prev_image(integer, map) :: any
-  # def get_prev_image(id, []) do
-  #   query =
-  #     from i in Image,
-  #       where: i.id < ^id,
-  #       order_by: [desc: i.id],
-  #       limit: 1
-
-  #   Repo.one(query) || get_last_image()
-  # end
-
   @doc """
     FIX: This needs to be refactored to share query basics with the normal index image tag
     fiter. Yes this does not handle wrap arounds.
@@ -92,17 +81,6 @@ defmodule Onagal.Images do
     Repo.one(query) || get_last_image()
   end
 
-  # def get_next_image(id, []) do
-  #   query =
-  #     from i in Image,
-  #       where: i.id > ^id,
-  #       preload: [:tags],
-  #       order_by: i.id,
-  #       limit: 1
-
-  #   Repo.one(query) || get_first_image()
-  # end
-
   @doc """
     FIX: This needs to be refactored to share query basics with the normal index image tag
     fiter. Yes this does not handle wrap arounds.
@@ -121,40 +99,6 @@ defmodule Onagal.Images do
       )
 
     Repo.one(query) || get_first_image()
-  end
-
-  def find_page_tuple(page, image) do
-    IO.puts("find_page_tuple")
-
-    case index = Enum.find_index(page.entries, fn img -> img.id == image.id end) do
-      nil ->
-        []
-
-      _ ->
-        prev_index = if index == 0, do: index, else: index - 1
-
-        [
-          Enum.at(page.entries, prev_index),
-          image,
-          Enum.at(page.entries, index + 1)
-        ]
-    end
-  end
-
-  def next_image_on_page(page, image) do
-    case find_page_tuple(page, image) do
-      [] -> get_first()
-      [_, _, next_image] -> next_image
-    end
-  end
-
-  def prev_image_on_page(page, image) do
-    IO.puts("images prev_image_on_page")
-
-    case find_page_tuple(page, image) do
-      [] -> get_first()
-      [prev_image, _, _] -> prev_image
-    end
   end
 
   def get_first_image() do
@@ -329,7 +273,6 @@ defmodule Onagal.Images do
         group_by: image.id
       )
 
-    IO.inspect(params)
     Repo.paginate(query, params)
   end
 
