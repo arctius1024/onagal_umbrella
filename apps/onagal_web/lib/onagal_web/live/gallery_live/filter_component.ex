@@ -5,16 +5,19 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
 
   @impl true
   def update(
-        %{id: "filter", tag_filter: tag_filter, tag_list: tag_list, image_tags: image_tags} =
-          _assigns,
+        %{
+          id: "filter",
+          tag_list: tag_list,
+          selected_filters: selected_filters,
+          selected_tags: selected_tags
+        } = _assigns,
         socket
-      )
-      when is_list(tag_list) do
+      ) do
     socket =
       socket
-      |> assign(:tag_filter, tag_filter)
+      |> assign(:selected_filters, selected_filters)
+      |> assign(:selected_tags, selected_tags)
       |> assign(:tag_list, tag_list)
-      |> assign(:image_tags, image_tags)
       |> assign(:tagset_list, list_tagsets())
       |> assign(:filterset_list, list_filtersets())
 
@@ -23,7 +26,7 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
 
   # Filtering here
   @impl true
-  def handle_event("filter", %{"tag_filter" => %{"tags" => tags}} = params, socket) do
+  def handle_event("filter", %{"selected_filters" => %{"tags" => tags}} = params, socket) do
     IO.puts("filter_form handle_event filter 1")
 
     {:noreply, handle_filter_event(params, socket, tags)}
@@ -61,14 +64,14 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
     tags = Tags.list_tags_by_tagset_name(tagset)
 
     # {:noreply, handle_tag_event(params, socket, list_tags(tags), :replace)}
-    {:noreply, socket |> assign(:image_tags, list_tags(tags))}
+    {:noreply, socket |> assign(:selected_tags, list_tags(tags))}
   end
 
   # Tagging here
   @impl true
   def handle_event(
         "tag",
-        %{"tag_image" => %{"tags" => tags, "add_replace" => add_replace}} = params,
+        %{"selected_tags" => %{"tags" => tags, "add_replace" => add_replace}} = params,
         socket
       ) do
     IO.puts("filter_form handle_event tag 1")
@@ -78,7 +81,7 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
   end
 
   @impl true
-  def handle_event("tag", %{"tag_image" => %{"add_replace" => add_replace}} = params, socket) do
+  def handle_event("tag", %{"selected_tags" => %{"add_replace" => add_replace}} = params, socket) do
     IO.puts("filter_form handle_event tag 2")
     tags = []
     mode = if add_replace == "true", do: :replace, else: :add
@@ -90,18 +93,18 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
   defp handle_filter_event(params, socket, tags) do
     IO.puts("filter_form handle_filter_event")
 
-    send(self(), {:tag_filter, tags: tags, params: params})
+    send(self(), {:selected_filters, tags: tags, params: params})
 
-    socket |> assign(:tag_filter, tags)
+    socket |> assign(:selected_filters, tags)
   end
 
   # Tag helper
   defp handle_tag_event(params, socket, tags, mode) do
     IO.puts("filter_form handle_tag_event")
 
-    send(self(), {:tag_images, tags: tags, mode: mode, params: params})
+    send(self(), {:selected_tags, tags: tags, mode: mode, params: params})
 
-    socket |> assign(:tag_image, tags)
+    socket |> assign(:selected_tags, tags)
   end
 
   defp list_tags(tags) do

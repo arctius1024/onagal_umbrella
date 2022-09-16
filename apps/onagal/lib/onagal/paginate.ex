@@ -3,179 +3,123 @@ defmodule Onagal.Paginate do
   Documentation for `Onagal.Paginate`.
   """
 
-  # alias Onagal.Repo
   alias Onagal.Images
 
-  # import Ecto.Query
+  def list_images(params), do: Images.paginate_images(params)
+  def list_images(params, tags), do: Images.paginate_images(params, tags)
 
-  @doc """
-    Given a list of tags - return the min and max ids associated with that list
-    Intentionally ignoring page parameters as we don't care for this
-  """
-  def get_min_max_image_ids_for_tags(tags) do
-    case first_page = Images.paginate_images_with_tags(%{page: 1}, tags) do
-      [] ->
-        nil
-
-      _ ->
-        last_page = Images.paginate_images_with_tags(%{page: first_page.total_pages}, tags)
-
-        min_id = hd(first_page.entries).id
-        max_id = List.last(last_page.entries).id
-        [min_id, max_id]
-    end
-  end
-
-  @doc """
-    Given current image list, and an image, determine if the image is in the list
-  """
-  def image_in_page?(images, image) do
+  def resolve_image_tuples(page, image, params, selected_filters) do
     cond do
-      image_in_prev_page?(images, image) -> false
-      image_in_next_page?(images, image) -> false
-      true -> true
-    end
-  end
+      is_very_first_image?(page, image) ->
+        get_image_tuple(:first_image, image, page, params, selected_filters)
 
-  def image_in_prev_page?(images, image) do
-    image.id < hd(images.entries).id
-  end
+      is_very_last_image?(page, image) ->
+        get_image_tuple(:last_image, image, page, params, selected_filters)
 
-  def image_in_next_page?(images, image) do
-    image.id > List.last(images.entries).id
-  end
+      on_prev_page?(page, image) ->
+        get_image_tuple(:prev_page, image, page, params, selected_filters)
 
-  @doc """
-    Given a page of images, filter tags and a starting image, determine which page the image is in
-  """
-  def find_image_page(images, tags, image) do
-    IO.puts("paginate find_image_page")
+      on_next_page?(page, image) ->
+        get_image_tuple(:next_page, image, page, params, selected_filters)
 
-    params = %{page: images.page_number, page_size: images.page_size}
+      first_on_page?(page, image) ->
+        get_image_tuple(:prev_boundary, image, page, params, selected_filters)
 
-    cond do
-      image_in_page?(images, image) ->
-        {images.page_number, images}
-
-      image_in_prev_page?(images, image) ->
-        IO.puts("prev_page")
-
-        find_image_page(
-          Images.paginate_images(
-            Map.merge(params, %{page: images.page_number - 1}),
-            tags
-          ),
-          tags,
-          image
-        )
-
-      image_in_next_page?(images, image) ->
-        IO.puts("next_page")
-
-        find_image_page(
-          Images.paginate_images(
-            Map.merge(params, %{page: images.page_number + 1}),
-            tags
-          ),
-          tags,
-          image
-        )
-    end
-  end
-
-  @doc """
-   Find prev image - including if its in the prev page of images
-  """
-  def get_prev_image(params, tag_filter, images, image) do
-    case check_for_prev_image(images, image) do
-      {:ok, prev_image} ->
-        {:ok, prev_image}
-
-      {:error, :start_boundary} ->
-        {:ok, image}
-
-      {:error, :page_boundary} ->
-        prev_images =
-          Images.paginate_images(Map.merge(params, %{page: images.page_number - 1}), tag_filter)
-
-        {:ok, List.last(prev_images.entries)}
-
-      {:error, :next_page} ->
-        {:error, :next_page}
-
-      {:error, :prev_page} ->
-        {:error, :prev_page}
-    end
-  end
-
-  def check_for_prev_image(images, image) do
-    IO.puts("check_for_prev_image")
-
-    cond do
-      image.id < hd(images.entries).id ->
-        {:error, :prev_page}
-
-      image.id > List.last(images.entries).id ->
-        {:error, :next_page}
-
-      image.id == hd(images.entries).id && images.page_number == 1 ->
-        {:error, :start_boundary}
-
-      image.id == hd(images.entries).id ->
-        {:error, :page_boundary}
+      last_on_page?(page, image) ->
+        get_image_tuple(:next_boundary, image, page, params, selected_filters)
 
       true ->
-        image_index = Enum.find_index(images.entries, fn img -> img.id == image.id end)
-        {:ok, Enum.at(images.entries, image_index - 1)}
+        get_image_tuple(:current, image, page, params, selected_filters)
     end
   end
 
-  @doc """
-   Find next image - including if its in the next page of images
-  """
-  def get_next_image(params, tag_filter, images, image) do
-    IO.puts("get_next_image")
-
-    case check_for_next_image(images, image) do
-      {:ok, next_image} ->
-        {:ok, next_image}
-
-      {:error, :end_boundary} ->
-        {:ok, image}
-
-      {:error, :page_boundary} ->
-        next_images =
-          Images.paginate_images(Map.merge(params, %{page: images.page_number + 1}), tag_filter)
-
-        {:ok, hd(next_images.entries)}
-
-      {:error, :next_page} ->
-        {:error, :next_page}
-
-      {:error, :prev_page} ->
-        {:error, :prev_page}
-    end
+  defp next_image_on_page(page, image) do
+    image_index = Enum.find_index(page.entries, fn img -> img.id == image.id end)
+    Enum.at(page.entries, image_index + 1)
   end
 
-  def check_for_next_image(images, image) do
-    IO.puts("check_for_next_image")
+  defp prev_image_on_page(page, image) do
+    image_index = Enum.find_index(page.entries, fn img -> img.id == image.id end)
+    Enum.at(page.entries, image_index - 1)
+  end
 
-    cond do
-      image.id < hd(images.entries).id ->
-        {:error, :prev_page}
+  defp prev_page(page, params, selected_filters) do
+    list_images(Map.merge(params, %{page: page.page_number - 1}), selected_filters)
+  end
 
-      image.id > List.last(images.entries).id ->
-        {:error, :next_page}
+  defp next_page(page, params, selected_filters) do
+    list_images(Map.merge(params, %{page: page.page_number + 1}), selected_filters)
+  end
 
-      image.id == List.last(images.entries).id && images.total_pages == images.page_number ->
-        {:error, :end_boundary}
+  defp get_image_tuple(:first_image, image, page, _params, _selected_filters) do
+    prev_image = image
+    next_image = next_image_on_page(page, image)
+    {prev_image, image, next_image, page}
+  end
 
-      image.id == List.last(images.entries).id ->
-        {:error, :page_boundary}
+  defp get_image_tuple(:last_image, image, page, _params, _selected_filters) do
+    prev_image = prev_image_on_page(page, image)
+    next_image = image
+    {prev_image, image, next_image, page}
+  end
 
-      true ->
-        image_index = Enum.find_index(images.entries, fn img -> img.id == image.id end)
-        {:ok, Enum.at(images.entries, image_index + 1)}
-    end
+  defp get_image_tuple(:prev_page, _image, page, params, selected_filters) do
+    next_image = hd(page.entries)
+    page = prev_page(page, params, selected_filters)
+    image = List.last(page.entries)
+    prev_image = prev_image_on_page(page, image)
+    {prev_image, image, next_image, page}
+  end
+
+  defp get_image_tuple(:next_page, _image, page, params, selected_filters) do
+    prev_image = List.last(page.entries)
+    page = next_page(page, params, selected_filters)
+    image = hd(page.entries)
+    next_image = next_image_on_page(page, image)
+    {prev_image, image, next_image, page}
+  end
+
+  defp get_image_tuple(:prev_boundary, image, page, params, selected_filters) do
+    prev_page = prev_page(page, params, selected_filters)
+    prev_image = List.last(prev_page.entries)
+    next_image = next_image_on_page(page, image)
+    {prev_image, image, next_image, page}
+  end
+
+  defp get_image_tuple(:next_boundary, image, page, params, selected_filters) do
+    next_page = next_page(page, params, selected_filters)
+    prev_image = prev_image_on_page(page, image)
+    next_image = hd(next_page.entries)
+    {prev_image, image, next_image, page}
+  end
+
+  defp get_image_tuple(:current, image, page, _params, _selected_filters) do
+    prev_image = prev_image_on_page(page, image)
+    next_image = next_image_on_page(page, image)
+    {prev_image, image, next_image, page}
+  end
+
+  defp is_very_first_image?(page, image) do
+    page.page_number == 1 && image.id == hd(page.entries).id
+  end
+
+  defp is_very_last_image?(page, image) do
+    page.page_number == page.total_pages && image.id == List.last(page.entries).id
+  end
+
+  defp on_prev_page?(page, image) do
+    image.id < hd(page.entries).id
+  end
+
+  defp on_next_page?(page, image) do
+    image.id > List.last(page.entries).id
+  end
+
+  defp first_on_page?(page, image) do
+    image.id == hd(page.entries).id
+  end
+
+  defp last_on_page?(page, image) do
+    image.id == List.last(page.entries).id
   end
 end
