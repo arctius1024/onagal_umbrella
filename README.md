@@ -43,3 +43,5 @@ Constructive criticisms most welcome, especially if they come in PR or links to 
 
 In particular if there is a good file/path traversing hex package I'd be most interested - the few that I saw seemed outdated
 or not fit for purpose. I'd rather not be in the business of custom writing that sort of thing if I can avoid it.
+
+See [TODO.md](https://github.com/arctius1024/onagal_umbrella/blob/master/TODO.md) for a more granular status on completed and upcoming work.
