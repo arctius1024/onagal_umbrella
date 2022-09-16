@@ -9,8 +9,7 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
           prev_image: prev_image,
           next_image: next_image,
           image_path: image_path,
-          image_id: image_id,
-          itags: itags
+          image: image
         } = _assigns,
         socket
       ) do
@@ -19,14 +18,13 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
       |> assign(:prev_image, prev_image)
       |> assign(:next_image, next_image)
       |> assign(:image_path, image_path)
-      |> assign(:itags, itags)
-      |> assign(:image_id, image_id)
+      |> assign(:image, image)
 
     {:ok, socket}
   end
 
-  def update(%{id: "display", itags: itags} = _assigns, socket) do
-    {:ok, socket |> assign(:itags, itags)}
+  def update(%{id: "display", image: image} = _assigns, socket) do
+    {:ok, socket |> assign(:image, image)}
   end
 
   def render(assigns) do
@@ -36,12 +34,12 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
     <ul>
       <table>
         <tr>
-          <%= if @prev_image.id != @image_id do %>
+          <%= if @prev_image.id != @image.id do %>
             <td><%= live_patch "Prev", to: Routes.gallery_index_path(@socket, :show, @prev_image.id) %></td>
           <% else %>
             <td>Prev</td>
           <% end %>
-          <%= if @next_image.id != @image_id do %>
+          <%= if @next_image.id != @image.id do %>
             <td><%= live_patch "Next", to: Routes.gallery_index_path(@socket, :show, @next_image.id) %></td>
           <% else %>
             <td>Next</td>
@@ -55,12 +53,16 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
       </div>
       <div>
         <ul class="imglist">
-        <%= for image_tag <- @itags do %>
+        <%= for image_tag <- list_tags_as_options(@image.tags) do %>
           <li><%= image_tag %></li>
         <% end %>
         </ul>
       </div>
     </ul>
     """
+  end
+
+  def list_tags_as_options(image_tags) do
+    Enum.map(image_tags, fn tag -> tag.name end)
   end
 end

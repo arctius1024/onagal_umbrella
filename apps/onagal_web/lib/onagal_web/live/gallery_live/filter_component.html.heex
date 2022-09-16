@@ -10,12 +10,12 @@
     <hr/>
 
     <.form let={f}
-        for={:tag_filter}
+        for={:selected_filters}
         phx-submit="filter"
         phx-target={@myself}
     >
         <%= label f, :tags %>
-        <%= multiple_select f, :tags, @tag_list, selected: @tag_filter %>
+        <%= multiple_select f, :tags, @tag_list, selected: @selected_filters %>
 
         <%= label f, :reset %>
         <%= reset "Reset" %>
@@ -36,12 +36,12 @@
     <hr/>
 
     <.form let={f}
-        for={:tag_image}
+        for={:selected_tags}
         phx-submit="tag"
         phx-target={@myself}
         >
         <%= label f, :tags %>
-        <%= multiple_select f, :tags, @tag_list, selected: @image_tags %>
+        <%= multiple_select f, :tags, @tag_list, selected: @selected_tags %>
 
         <%= label f, :replace %>
         <%= checkbox f, :add_replace %>

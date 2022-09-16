@@ -5,16 +5,25 @@ defmodule OnagalWeb.GalleryLive.Index do
   alias Onagal.Tags
   alias Onagal.Paginate
 
+  @moduledoc """
+    Main live hub for GalleryLive
+  """
+
   @impl true
   def mount(_params, session, socket) do
     IO.puts("handle_mount")
 
-    # TODO: Figure out why the **** PhoenixLivesession is needed for the filter
-    # Everything else works without it....
+    # selected_filters -> tags currently selected as filters
+    # selected_tags -> tags currently selected to apply to images
+    # selected_images -> images currently selected (for tagging)
     socket =
       socket
-      |> PhoenixLiveSession.maybe_subscribe(session)
-      |> assign_session_filter(session)
+      |> assign(:selected_filters, [])
+      |> assign(:selected_tags, [])
+      |> assign(:selected_images, [])
+      |> assign(:image_tags, [])
+      |> assign(:page, 1)
+      |> assign(:tag_list, Onagal.Tags.list_tags_as_options())
 
     {:ok, socket}
   end
@@ -23,90 +32,64 @@ defmodule OnagalWeb.GalleryLive.Index do
   def handle_params(params, _url, socket) do
     IO.puts("handle_params")
 
-    tag_filter = Map.get(socket.assigns, :tag_filter, [])
-    tag_list = Onagal.Tags.list_tags_as_options()
-
     socket =
       socket
-      |> assign(:tag_filter, tag_filter)
-      |> assign(:tag_list, tag_list)
-      |> assign(:image_tags, Map.get(socket.assigns, :image_tags, []))
-      |> assign(:selected_images, Map.get(socket.assigns, :selected_images, []))
+      |> assign(:page, parse_page(Map.get(params, "page", "1")))
+      |> assign(:tag_list, Onagal.Tags.list_tags_as_options())
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  # action handlers
+  @impl true
+  def handle_info({:selected_filters, [tags: tags, params: params]}, socket) do
+    IO.puts("index handle_info :selected_filters")
+
+    images = list_images(params, tags)
+
+    image =
+      if images.entries == [],
+        do: Images.get_first(),
+        else: hd(images.entries) |> Onagal.Repo.preload(:tags)
+
+    socket =
+      socket
+      |> assign(:selected_filters, tags)
+      |> assign(:images, images)
+      |> assign(:image, image)
+
+    {:noreply, socket}
+  end
 
   defp apply_action(socket, :index, params) do
     IO.puts("apply_action :index")
 
-    send_filter_update(:filter, socket.assigns)
-
-    socket
-    |> assign(:images, list_images(params, socket.assigns.tag_filter))
+    socket |> assign(:images, list_images(params, socket.assigns.selected_filters))
   end
 
   defp apply_action(socket, :show, %{"id" => id} = params) do
     IO.puts("apply_action :show")
 
     image = Images.get_image_with_tags(id)
-    tag_filter = socket.assigns.tag_filter
-    images = list_images(params, tag_filter)
+    selected_filters = socket.assigns.selected_filters
+    page = Map.get(socket.assigns, :images, list_images(params, selected_filters))
 
-    {_page, images} = Paginate.find_image_page(images, tag_filter, image)
-
-    # Since we ensure we have the correct image page above, we shouldn't
-    # have an issue being more than a page off.
-    {:ok, prev_image} = get_prev_image(params, tag_filter, images, image)
-    {:ok, next_image} = get_next_image(params, tag_filter, images, image)
+    {prev_image, image, next_image, images} =
+      Paginate.resolve_image_tuples(page, image, params, selected_filters)
 
     socket
     |> assign(:next_image, next_image)
     |> assign(:prev_image, prev_image)
+    |> assign(:images, images)
+    |> assign(:image, image |> Onagal.Repo.preload(:tags))
+    |> assign(:page, images.page_number)
     |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))
-    |> assign(:image_id, image.id)
-    |> assign(:image_tags, list_tags_as_options(image.tags))
-    |> assign(:itags, list_tags_as_options(image.tags))
-  end
-
-  # Filter helpers
-
-  @impl true
-  def handle_info({:live_session_updated, session}, socket) do
-    IO.puts("test handle_info :live_session_updated")
-
-    {:noreply, socket |> assign(:tag_filter, Map.get(session, "tag_filter", []))}
   end
 
   @impl true
-  def handle_info({:tag_filter, [tags: tags, params: params]}, socket) do
-    IO.puts("index handle_info :tag_filter")
+  def handle_info({:selected_tags, [tags: tags, mode: mode, params: _params]}, socket) do
+    IO.puts("index handle_info :selected_tags")
 
-    images = list_images(params, tags)
-    image = if images.entries == [], do: Images.get_first(), else: hd(images.entries)
-
-    send_filter_update(:filter, socket.assigns)
-
-    # The logic gets confusing if you change filters while selecting images as you may be unable to see some
-    # of the images that are selected (or unselect them!). Thus we reset the selection queue if you change filters.
-    socket = socket |> assign(:selected_images, [])
-
-    case socket.assigns.live_action do
-      :show -> send_filter_update({:show, socket: socket, images: images, image: image})
-      :index -> send_filter_update(:index, {images, socket.assigns.selected_images})
-    end
-
-    PhoenixLiveSession.put_session(socket, "tag_filter", tags)
-
-    {:noreply, socket |> assign(:images, images)}
-  end
-
-  @impl true
-  def handle_info({:tag_images, [tags: tags, mode: mode, params: _params]}, socket) do
-    IO.puts("index handle_info :tag_images")
-
-    handle_image_tagging(socket.assigns.live_action, tags, mode, socket)
+    socket = handle_image_tagging(socket.assigns.live_action, tags, mode, socket)
 
     {:noreply, socket}
   end
@@ -119,7 +102,6 @@ defmodule OnagalWeb.GalleryLive.Index do
   end
 
   @impl true
-  @spec handle_event(<<_::96>>, map, any) :: {:noreply, any}
   def handle_event("select_image", %{"value" => image_id}, socket) do
     IO.puts("index handle_event select_image")
     image_id = String.to_integer(image_id)
@@ -136,62 +118,27 @@ defmodule OnagalWeb.GalleryLive.Index do
     {:noreply, socket |> assign(:selected_images, new_selected_images)}
   end
 
-  # TODO: should these be more genericized (accept and pass on arbitrary parameters?)
-  defp send_filter_update(
-         :filter,
-         %{tag_filter: tags, tag_list: tag_list, image_tags: image_tags} = _assigns
-       ) do
-    send_update(
-      OnagalWeb.GalleryLive.FilterComponent,
-      id: "filter",
-      tag_filter: tags,
-      tag_list: tag_list,
-      image_tags: image_tags
-    )
-  end
-
-  defp send_filter_update(:index, {images, selected_images}) do
-    IO.puts("index send_filter_update 1")
-
-    send_update(
-      OnagalWeb.GalleryLive.MontageComponent,
-      id: "montage",
-      images: images,
-      selected_images: selected_images
-    )
-  end
-
-  defp send_filter_update({:show, [socket: socket, images: images, image: image]}) do
-    IO.puts("index send_filter_update 2")
-
-    send_update(
-      OnagalWeb.GalleryLive.DisplayComponent,
-      id: "display",
-      image_id: image.id,
-      itags: image.tags,
-      prev_image: Images.next_image_on_page(images, image),
-      next_image: Images.prev_image_on_page(images, image),
-      image_path: Routes.static_path(socket, Images.web_image_path(image))
-    )
-  end
-
   defp handle_image_tagging(:index, tags, mode, socket) do
     Enum.each(socket.assigns.selected_images, fn image_id ->
       image = Images.get_image_with_tags(image_id)
       retag_image(image, mode, tags)
     end)
+
+    socket
   end
 
   defp handle_image_tagging(:show, tags, mode, socket) do
-    image = Images.get_image_with_tags(socket.assigns.image_id)
+    image = socket.assigns.image |> Onagal.Repo.preload(:tags)
     retag_image(image, mode, tags)
     image = image |> Onagal.Repo.preload(:tags, force: true)
 
     send_update(
       OnagalWeb.GalleryLive.DisplayComponent,
       id: "display",
-      itags: list_tags_as_options(image.tags)
+      image: image
     )
+
+    socket |> assign(:image, image)
   end
 
   ####### index helper methods
@@ -205,12 +152,6 @@ defmodule OnagalWeb.GalleryLive.Index do
   def list_images(params, tags), do: Images.paginate_images(params, tags)
 
   ###### Show helper methods
-  def get_prev_image(params, tag_filter, images, image),
-    do: Paginate.get_prev_image(params, tag_filter, images, image)
-
-  def get_next_image(params, tag_filter, images, image),
-    do: Paginate.get_next_image(params, tag_filter, images, image)
-
   def list_tags_as_options(image_tags) do
     Enum.map(image_tags, fn tag -> tag.name end)
   end
@@ -228,12 +169,10 @@ defmodule OnagalWeb.GalleryLive.Index do
     end
   end
 
-  defp assign_session_filter(socket, session) do
-    socket
-    |> assign(:tag_filter, get_session_filter(session))
-  end
-
-  defp get_session_filter(session) do
-    Map.get(session, "tag_filter", [])
+  defp parse_page(raw_page) do
+    case Integer.parse(raw_page) do
+      {page, _} -> page
+      :error -> 1
+    end
   end
 end
