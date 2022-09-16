@@ -1,4 +1,4 @@
-
+* [*DONE*]
 - ~~massive refactor needed in live/index~~
 - ~~Figure out how to pass filter state between image :index and :show~~
 - ~~handle inter-page paging (paging boundaries just loop the page currently)~~
@@ -10,30 +10,32 @@
 - ~~make add/replace selectable when tagging in montage~~
 - ~~allow tagging to work properly when in :show~~
 - ~~tagging while in :show does not refresh tag list~~
-
 - ~~Add in UI ability to create tagsets~~
   - ~~Show should work~~
   - ~~New should work~~
   - ~~Edit Should work~~
   - ~~All of the above should also show associated tags (initially in "ugly" format)~~
-
 - ~~Add in UI ability to create filtersets (similar to tagsets)~~
   - ~~Show should work~~
   - ~~New should work~~
   - ~~Edit Should work~~
-
 - ~~Add ability to "apply" a tagset to the active list of tags~~
 - ~~Add ability to "apply" a filterset to active list of tag filters~~
+- ~~Figure out why the heck gallerylive/index uses two different methods of sub-pagination navigation!??!?~~
+  - ~~send_filter_update({:show,....})~~
+  - ~~apply_action(socket, :show....)~~
 
-- Figure out why the heck gallerylive/index uses two different methods of sub-pagination navigation!??!?
-  - send_filter_update({:show,....})
-  - apply_action(socket, :show....)
-- Make "tags" displays "pretty" (in tagsets/tags/images)
-- switching filters in show works but displays the wrong image relative to the :id
-- cleanup send_*_update functions in GalleryLive/index.ex
-- Refactoring pass on onagal_fs, its a rats nest in there
-- Possible refactor with onagal.images as well
+* [*FEATURES*]
+
+* [*FIXES/CLEANUPS*]
+- [PARTIAL] cleanup send_*_update functions in GalleryLive/index.ex
+- [PARTIAL] Possible refactor with onagal.images as well
 - add "clear selected tags" to filters/tags 
+- switching filters in show works but displays the wrong image relative to the :id
+- Refactoring pass on onagal_fs, its a rats nest in there
+
+* [*STYLING*]
+- Make "tags" displays "pretty" (in tagsets/tags/images)
 - style sidebar
 - style navbar
 - style all the things
