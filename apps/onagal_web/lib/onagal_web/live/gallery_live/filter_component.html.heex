@@ -33,6 +33,8 @@
         <%= select f, :select_filterset, @filterset_list, phx_change: "filterset_select" %>
     </.form>
 
+    <button type="button" phx-click="clear_filters" value="clear">Clear Filters</button>
+
     <hr/>
 
     <.form let={f}
@@ -61,4 +63,6 @@
         <%= label f, :tagset %>
         <%= select f, :select_tagset, @tagset_list, phx_change: "tagset_select" %>
     </.form>
+
+    <button type="button" phx-click="clear_tags" value="clear">Clear Tags</button>
 </div>

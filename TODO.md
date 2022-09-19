@@ -24,13 +24,15 @@
 - ~~Figure out why the heck gallerylive/index uses two different methods of sub-pagination navigation!??!?~~
   - ~~send_filter_update({:show,....})~~
   - ~~apply_action(socket, :show....)~~
+- ~~add "clear selected tags" to filters/tags~~
 
 * [*FEATURES*]
+- clearing filters should also submit to actually clear
 
 * [*FIXES/CLEANUPS*]
+- Fix missing menu errors on main landing page
 - [PARTIAL] cleanup send_*_update functions in GalleryLive/index.ex
 - [PARTIAL] Possible refactor with onagal.images as well
-- add "clear selected tags" to filters/tags 
 - switching filters in show works but displays the wrong image relative to the :id
 - Refactoring pass on onagal_fs, its a rats nest in there
 
