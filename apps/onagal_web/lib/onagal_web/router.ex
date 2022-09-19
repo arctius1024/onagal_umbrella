@@ -20,7 +20,9 @@ defmodule OnagalWeb.Router do
   scope "/", OnagalWeb do
     pipe_through(:browser)
 
-    get("/", PageController, :index)
+    live_session :default, on_mount: OnagalWeb.RouteAssigns do
+      get("/", PageController, :index)
+    end
   end
 
   # Other scopes may use custom stacks.
