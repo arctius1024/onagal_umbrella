@@ -40,26 +40,6 @@ defmodule OnagalWeb.GalleryLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  @impl true
-  def handle_info({:selected_filters, [tags: tags, params: params]}, socket) do
-    IO.puts("index handle_info :selected_filters")
-
-    images = list_images(params, tags)
-
-    image =
-      if images.entries == [],
-        do: Images.get_first(),
-        else: hd(images.entries) |> Onagal.Repo.preload(:tags)
-
-    socket =
-      socket
-      |> assign(:selected_filters, tags)
-      |> assign(:images, images)
-      |> assign(:image, image)
-
-    {:noreply, socket}
-  end
-
   defp apply_action(socket, :index, params) do
     IO.puts("apply_action :index")
 
@@ -86,6 +66,26 @@ defmodule OnagalWeb.GalleryLive.Index do
   end
 
   @impl true
+  def handle_info({:selected_filters, [tags: tags, params: params]}, socket) do
+    IO.puts("index handle_info :selected_filters")
+
+    images = list_images(params, tags)
+
+    image =
+      if images.entries == [],
+        do: Images.get_first(),
+        else: hd(images.entries) |> Onagal.Repo.preload(:tags)
+
+    socket =
+      socket
+      |> assign(:selected_filters, tags)
+      |> assign(:images, images)
+      |> assign(:image, image)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:selected_tags, [tags: tags, mode: mode, params: _params]}, socket) do
     IO.puts("index handle_info :selected_tags")
 
@@ -99,6 +99,32 @@ defmodule OnagalWeb.GalleryLive.Index do
     IO.puts("index handle_event clear_selections")
 
     {:noreply, socket |> assign(:selected_images, [])}
+  end
+
+  @impl true
+  def handle_event("clear_filters", %{"value" => "clear"}, socket) do
+    IO.puts("index handle_event clear_filters")
+
+    send_update(
+      OnagalWeb.GalleryLive.FilterComponent,
+      id: "filter",
+      selected_filters: []
+    )
+
+    {:noreply, socket |> assign(:selected_filters, [])}
+  end
+
+  @impl true
+  def handle_event("clear_tags", %{"value" => "clear"}, socket) do
+    IO.puts("index handle_event clear_tags")
+
+    send_update(
+      OnagalWeb.GalleryLive.FilterComponent,
+      id: "filter",
+      selected_tags: []
+    )
+
+    {:noreply, socket |> assign(:selected_tags, [])}
   end
 
   @impl true

@@ -24,6 +24,16 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
     {:ok, socket}
   end
 
+  def update(%{id: "filter", selected_filters: selected_filters}, socket) do
+    IO.puts("filter_component :update selected_filters")
+    {:ok, socket |> assign(:selected_filters, selected_filters)}
+  end
+
+  def update(%{id: "filter", selected_tags: selected_tags}, socket) do
+    IO.puts("filter_component :update selected_tags")
+    {:ok, socket |> assign(:selected_tags, selected_tags)}
+  end
+
   # Filtering here
   @impl true
   def handle_event("filter", %{"selected_filters" => %{"tags" => tags}} = params, socket) do
