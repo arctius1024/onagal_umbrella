@@ -25,9 +25,12 @@
   - ~~send_filter_update({:show,....})~~
   - ~~apply_action(socket, :show....)~~
 - ~~add "clear selected tags" to filters/tags~~
+- ~~increase density of gallery view to show more thumbs~~
+  - ~~decrease thumb size (from 160 -> 120)~~
+  - ~~decrease CSS area for image list elements~~
 
 * [*FEATURES*]
-- clearing filters should also submit to actually clear
+- improve clearing filters
 
 * [*FIXES/CLEANUPS*]
 - Fix missing menu errors on main landing page

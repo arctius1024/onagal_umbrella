@@ -3,5 +3,5 @@ defmodule Onagal.Repo do
     otp_app: :onagal,
     adapter: Ecto.Adapters.Postgres
 
-  use Scrivener, page_size: 12
+  use Scrivener, page_size: 24
 end
