@@ -215,8 +215,8 @@ defmodule Onagal.Images do
     Thumbnex.create_thumbnail(
       full_image_path(image),
       system_thumbnail_image_path(image),
-      max_width: 160,
-      max_height: 160
+      max_width: 120,
+      max_height: 120
     )
   end
 

@@ -21,20 +21,23 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
       <ul class="imglist">
         <%= for image <- @images.entries do %>
           <li>
-            <%= live_patch to: Routes.gallery_index_path(@socket, :show, image) do %>
-            <img id={"image-#{image.id}"}
-                 class={image_is_selected(@selected_images, image)}
-                 src={thumbnail_for_image(image)}
-                 alt={image.original_name}>
-            <% end %>
-
-            <button
-              type="button"
-              phx-click="select_image"
-              value={image.id}
-            >
-              Select
-            </button>
+            <div>
+              <%= live_patch to: Routes.gallery_index_path(@socket, :show, image) do %>
+              <img id={"image-#{image.id}"}
+                  class={image_is_selected(@selected_images, image)}
+                  src={thumbnail_for_image(image)}
+                  alt={image.original_name}>
+              <% end %>
+            </div>
+            <div>
+              <button
+                type="button"
+                phx-click="select_image"
+                value={image.id}
+              >
+                Select
+              </button>
+            </div>
           </li>
         <% end %>
       </ul>
