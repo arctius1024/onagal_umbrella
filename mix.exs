@@ -8,7 +8,7 @@ defmodule Onagal.Umbrella.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
-      compilers: [:unused] ++ Mix.compilers()
+      compilers: [] ++ Mix.compilers()  # :unused
     ]
   end
 

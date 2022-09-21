@@ -89,8 +89,15 @@ config :tailwind,
   default: [
     args: ~w(
       --config=tailwind.config.js
-      --input=css/app.css
+      --input=../priv/static/assets/app.css.tailwind
       --output=../priv/static/assets/app.css
     ),
+    cd: Path.expand("../apps/onagal_web/assets", __DIR__)
+  ]
+
+config :dart_sass,
+  version: "1.49.11",
+  default: [
+    args: ~w(css/app.scss ../priv/static/assets/app.css.tailwind),
     cd: Path.expand("../apps/onagal_web/assets", __DIR__)
   ]
