@@ -52,6 +52,7 @@ defmodule OnagalWeb.MixProject do
       {:onagal, in_umbrella: true},
       {:onagal_fs, in_umbrella: true},
       {:jason, "~> 1.2"},
+      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {:plug_cowboy, "~> 2.5"}
     ]
   end
@@ -63,7 +64,7 @@ defmodule OnagalWeb.MixProject do
     [
       setup: ["deps.get"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.deploy": ["esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["esbuild default --minify", "tailwind default --minify", "phx.digest"]
     ]
   end
 end
