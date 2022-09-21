@@ -14,14 +14,14 @@
         phx-submit="filter"
         phx-target={@myself}
     >
-        <%= label f, :tags %>
-        <%= multiple_select f, :tags, @tag_list, selected: @selected_filters %>
+        <div>
+            <%= label f, :tags %>
+            <%= multiple_select f, :tags, @tag_list, selected: @selected_filters %>
+        </div>
 
-        <%= label f, :reset %>
-        <%= reset "Reset" %>
-
-        <%= label f, :submit %>
         <%= submit "Filter" %>
+
+        <%= reset "Reset" %>
     </.form>
 
     <.form let={f}
@@ -42,17 +42,17 @@
         phx-submit="tag"
         phx-target={@myself}
         >
-        <%= label f, :tags %>
-        <%= multiple_select f, :tags, @tag_list, selected: @selected_tags %>
+        <div>
+            <%= label f, :tags %>
+            <%= multiple_select f, :tags, @tag_list, selected: @selected_tags %>
 
-        <%= label f, :replace %>
-        <%= checkbox f, :add_replace %>
+            <%= label f, :replace %>
+            <%= checkbox f, :add_replace %>
+        </div>
 
-        <%= label f, :reset %>
-        <%= reset "Reset" %>
-
-        <%= label f, :submit %>
         <%= submit "Tag"%>
+
+        <%= reset "Reset" %>
     </.form>
 
     <.form let={f}
