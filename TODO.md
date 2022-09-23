@@ -28,15 +28,20 @@
 - ~~increase density of gallery view to show more thumbs~~
   - ~~decrease thumb size (from 160 -> 120)~~
   - ~~decrease CSS area for image list elements~~
+- ~~in montage view - there appears to be a problem where the thumbnail order differs from the actual image when clicked.~~
+- ~~switching filters in show works but displays the wrong image relative to the :id~~
+- ~~handle filters returning only a single image~~
+- ~~force ordering of paginated image queries~~
 
 * [*FEATURES*]
 - improve clearing filters
 
 * [*FIXES/CLEANUPS*]
+- Tags aren't selected by default in display view filter control but should be
+  - have the filter prefer image.tags then selected_tags; null out image on montage
 - Fix missing menu errors on main landing page
 - [PARTIAL] cleanup send_*_update functions in GalleryLive/index.ex
 - [PARTIAL] Possible refactor with onagal.images as well
-- switching filters in show works but displays the wrong image relative to the :id
 - Refactoring pass on onagal_fs, its a rats nest in there
 
 * [*STYLING*]

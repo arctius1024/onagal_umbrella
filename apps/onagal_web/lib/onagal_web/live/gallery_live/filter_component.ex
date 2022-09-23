@@ -36,18 +36,18 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
 
   # Filtering here
   @impl true
-  def handle_event("filter", %{"selected_filters" => %{"tags" => tags}} = params, socket) do
+  def handle_event("filter", %{"selected_filters" => %{"filters" => filters}} = params, socket) do
     IO.puts("filter_form handle_event filter 1")
 
-    {:noreply, handle_filter_event(params, socket, tags)}
+    {:noreply, handle_filter_event(params, socket, filters)}
   end
 
   @impl true
   def handle_event("filter", params, socket) do
     IO.puts("filter_form handle_event filter 2")
-    tags = []
+    filters = []
 
-    {:noreply, handle_filter_event(params, socket, tags)}
+    {:noreply, handle_filter_event(params, socket, filters)}
   end
 
   # Filterset here
@@ -100,12 +100,12 @@ defmodule OnagalWeb.GalleryLive.FilterComponent do
   end
 
   # Filter helper
-  defp handle_filter_event(params, socket, tags) do
+  defp handle_filter_event(params, socket, filters) do
     IO.puts("filter_form handle_filter_event")
 
-    send(self(), {:selected_filters, tags: tags, params: params})
+    send(self(), {:selected_filters, filters: filters, params: params})
 
-    socket |> assign(:selected_filters, tags)
+    socket |> assign(:selected_filters, filters)
   end
 
   # Tag helper

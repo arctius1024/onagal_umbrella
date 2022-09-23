@@ -15,8 +15,8 @@
         phx-target={@myself}
     >
         <div>
-            <%= label f, :tags %>
-            <%= multiple_select f, :tags, @tag_list, selected: @selected_filters %>
+            <%= label f, :filters %>
+            <%= multiple_select f, :filters, @tag_list, selected: @selected_filters %>
         </div>
 
         <%= submit "Filter" %>

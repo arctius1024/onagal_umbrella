@@ -43,7 +43,9 @@ defmodule OnagalWeb.GalleryLive.Index do
   defp apply_action(socket, :index, params) do
     IO.puts("apply_action :index")
 
-    socket |> assign(:images, list_images(params, socket.assigns.selected_filters))
+    socket
+    |> assign(:images, list_images(params, socket.assigns.selected_filters))
+    |> assign(:image, nil)
   end
 
   defp apply_action(socket, :show, %{"id" => id} = params) do
@@ -62,27 +64,45 @@ defmodule OnagalWeb.GalleryLive.Index do
     |> assign(:images, images)
     |> assign(:image, image |> Onagal.Repo.preload(:tags))
     |> assign(:page, images.page_number)
-    |> assign(:image_path, Routes.static_path(socket, Images.web_image_path(image)))
   end
 
   @impl true
-  def handle_info({:selected_filters, [tags: tags, params: params]}, socket) do
+  def handle_info({:selected_filters, [filters: filters, params: params]}, socket) do
     IO.puts("index handle_info :selected_filters")
 
-    images = list_images(params, tags)
+    images = list_images(params, filters)
 
     image =
       if images.entries == [],
-        do: Images.get_first(),
+        do: nil,
         else: hd(images.entries) |> Onagal.Repo.preload(:tags)
 
+    handle_filtering(
+      socket.assigns.live_action,
+      filters,
+      images,
+      image,
+      socket |> assign(:selected_filters, filters)
+    )
+  end
+
+  defp handle_filtering(:index, filters, images, image, socket) do
     socket =
       socket
-      |> assign(:selected_filters, tags)
       |> assign(:images, images)
       |> assign(:image, image)
 
     {:noreply, socket}
+  end
+
+  defp handle_filtering(:show, _filters, _images, image, socket) do
+    case image do
+      nil ->
+        {:noreply, push_patch(socket, to: Routes.gallery_index_path(socket, :index, page: 1))}
+
+      _ ->
+        {:noreply, push_patch(socket, to: Routes.gallery_index_path(socket, :show, image.id))}
+    end
   end
 
   @impl true
