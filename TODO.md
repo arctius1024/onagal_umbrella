@@ -32,6 +32,7 @@
 - ~~switching filters in show works but displays the wrong image relative to the :id~~
 - ~~handle filters returning only a single image~~
 - ~~force ordering of paginated image queries~~
+- ~~fix changing filters in show sometimes display incorrect image~~
 
 * [*FEATURES*]
 - improve clearing filters

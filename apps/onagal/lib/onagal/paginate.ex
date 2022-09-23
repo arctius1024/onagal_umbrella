@@ -13,6 +13,8 @@ defmodule Onagal.Paginate do
     iterating on this - consider detecting cases and using those to determine next/prev page/image
   """
   def resolve_image_tuples(page, image, params, selected_filters) do
+    IO.puts("resolve_image_tuple")
+
     cond do
       is_very_first_image?(page, image) && is_very_last_image?(page, image) ->
         get_image_tuple(:only_image, image, page, params, selected_filters)

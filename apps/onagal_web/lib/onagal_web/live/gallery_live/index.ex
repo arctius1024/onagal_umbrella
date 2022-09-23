@@ -70,26 +70,30 @@ defmodule OnagalWeb.GalleryLive.Index do
   def handle_info({:selected_filters, [filters: filters, params: params]}, socket) do
     IO.puts("index handle_info :selected_filters")
 
-    images = list_images(params, filters)
+    images = list_images(Map.merge(params, %{page: 1}), filters)
 
     image =
       if images.entries == [],
         do: nil,
         else: hd(images.entries) |> Onagal.Repo.preload(:tags)
 
+    socket =
+      socket
+      |> assign(:selected_filters, filters)
+      |> assign(:images, images)
+
     handle_filtering(
       socket.assigns.live_action,
       filters,
       images,
       image,
-      socket |> assign(:selected_filters, filters)
+      socket
     )
   end
 
   defp handle_filtering(:index, filters, images, image, socket) do
     socket =
       socket
-      |> assign(:images, images)
       |> assign(:image, image)
 
     {:noreply, socket}
