@@ -193,7 +193,8 @@ defmodule Onagal.Images do
         where: image.id == ^id,
         preload: [:tags],
         # join: tag in assoc(image, :tags),
-        group_by: image.id
+        group_by: image.id,
+        order_by: image.id
       )
 
     Repo.one(query)
@@ -270,7 +271,8 @@ defmodule Onagal.Images do
         where: image.id in ^image_ids,
         preload: [:tags],
         # join: tag in assoc(image, :tags),
-        group_by: image.id
+        group_by: image.id,
+        order_by: image.id
       )
 
     Repo.paginate(query, params)
@@ -288,7 +290,7 @@ defmodule Onagal.Images do
 
     {:ok, %Postgrex.Result{rows: rows} = _} =
       Onagal.Repo.query(
-        "SELECT * FROM images_with_all_tag_names(array[#{sql_safe_tag_name_list}]);"
+        "SELECT * FROM images_with_all_tag_names(array[#{sql_safe_tag_name_list}]) ORDER BY image_id;"
       )
 
     Enum.flat_map(rows, fn v -> v end)

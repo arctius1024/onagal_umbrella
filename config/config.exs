@@ -83,3 +83,21 @@ import_config "#{config_env()}.exs"
 config :onagal_fs, Onagal.Fs,
   watch_dir: System.get_env("WATCH_DIR"),
   manage_dir: System.get_env("MANAGE_DIR")
+
+config :tailwind,
+  version: "3.0.24",
+  default: [
+    args: ~w(
+      --config=tailwind.config.js
+      --input=../priv/static/assets/app.css.tailwind
+      --output=../priv/static/assets/app.css
+    ),
+    cd: Path.expand("../apps/onagal_web/assets", __DIR__)
+  ]
+
+config :dart_sass,
+  version: "1.49.11",
+  default: [
+    args: ~w(css/app.scss ../priv/static/assets/app.css.tailwind),
+    cd: Path.expand("../apps/onagal_web/assets", __DIR__)
+  ]

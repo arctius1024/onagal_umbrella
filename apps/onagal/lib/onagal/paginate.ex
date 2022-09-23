@@ -8,8 +8,15 @@ defmodule Onagal.Paginate do
   def list_images(params), do: Images.paginate_images(params)
   def list_images(params, tags), do: Images.paginate_images(params, tags)
 
+  @doc """
+    TODO: code-smell here.
+    iterating on this - consider detecting cases and using those to determine next/prev page/image
+  """
   def resolve_image_tuples(page, image, params, selected_filters) do
     cond do
+      is_very_first_image?(page, image) && is_very_last_image?(page, image) ->
+        get_image_tuple(:only_image, image, page, params, selected_filters)
+
       is_very_first_image?(page, image) ->
         get_image_tuple(:first_image, image, page, params, selected_filters)
 
@@ -49,6 +56,12 @@ defmodule Onagal.Paginate do
 
   defp next_page(page, params, selected_filters) do
     list_images(Map.merge(params, %{page: page.page_number + 1}), selected_filters)
+  end
+
+  defp get_image_tuple(:only_image, image, page, _params, _selected_filters) do
+    prev_image = image
+    next_image = image
+    {prev_image, image, next_image, page}
   end
 
   defp get_image_tuple(:first_image, image, page, _params, _selected_filters) do

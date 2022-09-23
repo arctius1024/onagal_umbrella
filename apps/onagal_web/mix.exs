@@ -11,7 +11,7 @@ defmodule OnagalWeb.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:unused] ++ Mix.compilers(),
+      compilers: [] ++ Mix.compilers(),  # add :unused to get unused warnings
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -52,6 +52,8 @@ defmodule OnagalWeb.MixProject do
       {:onagal, in_umbrella: true},
       {:onagal_fs, in_umbrella: true},
       {:jason, "~> 1.2"},
+      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
+      {:dart_sass, "~> 0.5", runtime: Mix.env() == :dev},
       {:plug_cowboy, "~> 2.5"}
     ]
   end
@@ -61,9 +63,10 @@ defmodule OnagalWeb.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get"],
+      setup: ["deps.get", "assets.build"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.deploy": ["esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["esbuild default --minify", "sass default", "tailwind default --minify", "phx.digest"],
+      "assets.build": [ "esbuild default", "sass default", "tailwind default" ]
     ]
   end
 end
