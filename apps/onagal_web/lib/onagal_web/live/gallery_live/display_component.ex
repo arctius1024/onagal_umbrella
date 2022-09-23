@@ -1,14 +1,13 @@
 defmodule OnagalWeb.GalleryLive.DisplayComponent do
   use OnagalWeb, :live_component
 
-  # alias Onagal.Images
+  alias Onagal.Images
 
   def update(
         %{
           id: "display",
           prev_image: prev_image,
           next_image: next_image,
-          image_path: image_path,
           image: image
         } = _assigns,
         socket
@@ -17,14 +16,25 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
       socket
       |> assign(:prev_image, prev_image)
       |> assign(:next_image, next_image)
-      |> assign(:image_path, image_path)
       |> assign(:image, image)
+
+    override_tags(image.tags)
 
     {:ok, socket}
   end
 
   def update(%{id: "display", image: image} = _assigns, socket) do
+    override_tags(image.tags)
+
     {:ok, socket |> assign(:image, image)}
+  end
+
+  defp override_tags(tags) do
+    send_update(
+      OnagalWeb.GalleryLive.FilterComponent,
+      id: "filter",
+      selected_tags: list_tags_as_options(tags)
+    )
   end
 
   def render(assigns) do
@@ -48,7 +58,7 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
       </table>
       <div>
         <%= live_patch to: Routes.gallery_index_path(@socket, :index) do %>
-          <img src={@image_path} style="width: 25vw; min-width: 320px;">
+          <img src={Routes.static_path(@socket, Images.web_image_path(@image))} style="width: 25vw; min-width: 320px;">
         <% end %>
       </div>
       <div>
