@@ -23,7 +23,6 @@ defmodule OnagalWeb.GalleryLive.Index do
       |> assign(:selected_images, [])
       |> assign(:image_tags, [])
       |> assign(:page, 1)
-      |> assign(:tag_list, Onagal.Tags.list_tags_as_options())
 
     {:ok, socket}
   end
@@ -51,6 +50,12 @@ defmodule OnagalWeb.GalleryLive.Index do
   defp apply_action(socket, :show, %{"id" => id} = params) do
     IO.puts("apply_action :show")
 
+    if !Map.has_key?(socket.assigns, :images) and socket.assigns.page == 1,
+      do: push_patch(socket, to: Routes.gallery_index_path(socket, :index, page: 1)),
+      else: show_action(socket, params, id)
+  end
+
+  defp show_action(socket, params, id) do
     image = Images.get_image_with_tags(id)
     selected_filters = socket.assigns.selected_filters
     page = Map.get(socket.assigns, :images, list_images(params, selected_filters))
