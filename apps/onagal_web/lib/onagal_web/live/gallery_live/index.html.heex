@@ -1,8 +1,8 @@
-<div class="flex-container" style="display: flex; align-items: stretch;">
-    <div class="flex-child" style="flex: 0 1 240px; background: #03a9f4;">
+<div>
+    <div>
       <.live_component module={OnagalWeb.GalleryLive.FilterComponent} id="filter" tag_list={@tag_list} selected_filters={@selected_filters} selected_tags={@selected_tags}/>
     </div>
-  <div class="flex-child" style="flex: 1; height: 720px;">
+  <div>
     <%= if @live_action == :index do %>
       <.live_component module={OnagalWeb.GalleryLive.MontageComponent} id="montage" images={@images} selected_images={@selected_images} />
     <% else %>
