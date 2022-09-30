@@ -1,13 +1,30 @@
-<div>
-    <div>
-      <.live_component module={OnagalWeb.GalleryLive.FilterComponent} id="filter" tag_list={@tag_list} selected_filters={@selected_filters} selected_tags={@selected_tags}/>
-    </div>
-  <div>
+<div class="flex flex-row  px-4 py-8 overflow-y-auto border-r">
+  <div class="flex w-1/5 flex-col justify-between mt-6">
+    <aside>
+      <ul>
+        <li>
+          <.live_component module={OnagalWeb.GalleryLive.FilterComponent} 
+            id="filter"
+            tag_list={@tag_list} 
+            selected_filters={@selected_filters} 
+            selected_tags={@selected_tags}/>
+        </li>
+      </ul>
+    </aside>
+  </div>
+
+  <div class="flex w-4/5">
     <%= if @live_action == :index do %>
-      <.live_component module={OnagalWeb.GalleryLive.MontageComponent} id="montage" images={@images} selected_images={@selected_images} />
+      <.live_component module={OnagalWeb.GalleryLive.MontageComponent} 
+        id="montage" 
+        images={@images} 
+        selected_images={@selected_images} />
     <% else %>
-      <.live_component module={OnagalWeb.GalleryLive.DisplayComponent} id="display"
-        prev_image={@prev_image} next_image={@next_image} image={@image} />
+      <.live_component module={OnagalWeb.GalleryLive.DisplayComponent} 
+        id="display"
+        prev_image={@prev_image} 
+        next_image={@next_image} 
+        image={@image} />
     <% end %>
   </div>
 </div>

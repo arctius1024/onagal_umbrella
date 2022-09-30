@@ -15,55 +15,35 @@
         <nav class="flex items-center justify-between p-6 container mx-auto bg-blue-900">
           <!-- Menu items in the center here -->
           <div class="text-lg text-gray-600 hidden lg:flex">
-            <a href="/" class="block mt-4 lg:inline-block text-white hover:text-yellow-300 lg:mt-0 mr-10">
-                Home
-            </a>
+            <%= link "Home", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
+              to: "/" %>
             <%= link "Gallery", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
               to: Routes.gallery_index_path(@conn, :index) %>
-              
-
-            <button id="dropdownDefault" data-dropdown-toggle="dropdown" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Dropdown button <svg class="ml-2 w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
-            <!-- Dropdown menu -->
-            <div id="dropdown" class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700">
-                <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefault">
-                  <li>
-                    <a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>
-                  </li>
-                </ul>
-            </div>
-            <a href="#" class="block mt-4 lg:inline-block text-blue-300 hover:text-yellow-300 lg:mt-0 mr-10">
-                Manage
-            </a>
+            <%= link "Tags", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
+              to: Routes.tag_index_path(@conn, :index) %>
+            <%= link "Tagsets", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
+              to: Routes.tagset_index_path(@conn, :index) %>
+            <%= link "Filtersets", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
+              to: Routes.filterset_index_path(@conn, :index) %>
             <%= if @current_user do %>
               <%= link "Settings", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
                 to: Routes.user_settings_path(@conn, :edit) %>
               <%= link "Dashboard", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10",
                 to: Routes.live_dashboard_path(@conn, :home) %>
-              <%= link "Log out", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0", 
+              <%= link "Logout", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0", 
                 to: Routes.user_session_path(@conn, :delete), method: :delete %>
             <% else %>
-              <a href="/login" class="block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10">
-                  Login
-              </a>
+              <%= link "Login", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10",
+                to: Routes.user_session_path(@conn, :new) %>
               <%= link "Register", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0",
                 to: Routes.user_registration_path(@conn, :new) %>
             <% end %>
           </div>
         </nav>
     </header>
-    <main class="mt-8 lg:mt-16">
-      <section class="container mx-auto px-6">
-        <%= @inner_content %>
-      </section>
-    </main>
+
+    <div class="flex">
+      <%= @inner_content %>
+    </div>
   </body>
 </html>
