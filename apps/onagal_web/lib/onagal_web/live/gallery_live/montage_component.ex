@@ -18,18 +18,16 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
   def render(assigns) do
     ~H"""
     <div>
-      <ul class="imglist">
+      <div class="flex flex-row flex-wrap bg-yellow-100">
         <%= for image <- @images.entries do %>
-          <li>
-            <div>
-              <%= live_patch to: Routes.gallery_index_path(@socket, :show, image) do %>
+          <div class="w-1/6 bg-orange-100 py-1 border-2 border-zinc-400">
+            <%= live_patch to: Routes.gallery_index_path(@socket, :show, image) do %>
               <img id={"image-#{image.id}"}
-                  class={image_is_selected(@selected_images, image)}
-                  src={thumbnail_for_image(image)}
-                  alt={image.original_name}>
+                class={image_is_selected(@selected_images, image)}
+                src={thumbnail_for_image(image)}
+                alt={image.original_name}>
               <% end %>
-            </div>
-            <div>
+
               <button
                 type="button"
                 phx-click="select_image"
@@ -38,30 +36,37 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
               >
                 Select
               </button>
-            </div>
-          </li>
+          </div>
         <% end %>
-      </ul>
+      </div>
 
-      <div class="pagination">
-        <%= if @images.page_number > 1 do %>
-          <%= live_patch "<< Prev Page",
-              to: Routes.gallery_index_path(@socket, :index, page: @images.page_number - 1),
-              class: "pagination-link" %>
-        <% end %>
+      <div class="flex justify-center">
+        <ul class="flex list-style-none">
+          <%= if @images.page_number > 1 do %>
+            <li class="page-item">
+              <%= live_patch "<< Prev Page",
+                  to: Routes.gallery_index_path(@socket, :index, page: @images.page_number - 1),
+                  class: "page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none" %>
+            </li>
+          <% end %>
 
-        <%= if @images.page_number < @images.total_pages do %>
-          <%= live_patch "Next Page >>",
-              to: Routes.gallery_index_path(@socket, :index, page: @images.page_number + 1),
-              class: "pagination-link" %>
-        <% end %>
+          <%= if @images.page_number < @images.total_pages do %>
+            <li class="page-item">
+              <%= live_patch "Next Page >>",
+                    to: Routes.gallery_index_path(@socket, :index, page: @images.page_number + 1),
+                    class: "page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none" %>
+            </li>
+          <% end %>
+        </ul>
       </div>
     </div>
     """
   end
 
   defp image_is_selected(images, image) do
-    if Enum.any?(images, fn x -> x == image.id end), do: "selected", else: "unselected"
+    if Enum.any?(images, fn x -> x == image.id end),
+      do: "block object-scale-down h-120 w-120 object-center rounded-lg border-2 border-red-500",
+      else: "block object-scale-down h-120 w-120 object-center rounded-lg border-2 border-black"
   end
 
   defp thumbnail_for_image(image) do
