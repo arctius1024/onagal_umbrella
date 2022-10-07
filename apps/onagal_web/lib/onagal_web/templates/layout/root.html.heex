@@ -11,39 +11,43 @@
     <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
   </head>
   <body>
-    <header>
-        <nav class="flex items-center justify-between p-6 container mx-auto bg-blue-900">
-          <!-- Menu items in the center here -->
-          <div class="text-lg text-gray-600 hidden lg:flex">
-            <%= link "Home", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
-              to: "/" %>
-            <%= link "Gallery", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
-              to: Routes.gallery_index_path(@conn, :index) %>
-            <%= link "Tags", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
-              to: Routes.tag_index_path(@conn, :index) %>
-            <%= link "Tagsets", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
-              to: Routes.tagset_index_path(@conn, :index) %>
-            <%= link "Filtersets", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
-              to: Routes.filterset_index_path(@conn, :index) %>
-            <%= if @current_user do %>
-              <%= link "Settings", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10", 
-                to: Routes.user_settings_path(@conn, :edit) %>
-              <%= link "Dashboard", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10",
-                to: Routes.live_dashboard_path(@conn, :home) %>
-              <%= link "Logout", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0", 
-                to: Routes.user_session_path(@conn, :delete), method: :delete %>
-            <% else %>
-              <%= link "Login", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0 mr-10",
-                to: Routes.user_session_path(@conn, :new) %>
-              <%= link "Register", class: "block text-blue-300 hover:text-yellow-300 mt-4 lg:inline-block lg:mt-0",
-                to: Routes.user_registration_path(@conn, :new) %>
-            <% end %>
-          </div>
-        </nav>
-    </header>
+    <div class="flex items-center justify-between p-6 container mx-auto bg-blue-900">
+      <div class="mx-auto">
+        <%= link "Home", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: "/" %>
+      </div>
+      <div class="mx-auto">
+        <%= link "Gallery", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.gallery_index_path(@conn, :index) %>
+      </div>
+      <div class="mx-auto">
+        <%= link "Tags", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.tag_index_path(@conn, :index) %>
+      </div>
+      <div class="mx-auto">
+        <%= link "Tagsets", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.tagset_index_path(@conn, :index) %>
+      </div>
+      <div class="mx-auto">
+        <%= link "Filtersets", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.filterset_index_path(@conn, :index) %>
+      </div>
 
-    <div class="flex">
-      <%= @inner_content %>
+      <%= if @current_user do %>
+        <div class="mx-auto">
+          <%= link "Settings", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.user_settings_path(@conn, :edit) %>
+        </div>
+        <div class="mx-auto">
+          <%= link "Dashboard", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.live_dashboard_path(@conn, :home) %>
+        </div>
+        <div class="mx-auto">
+          <%= link "Logout", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.user_session_path(@conn, :delete), method: :delete %>
+        </div>
+      <% else %>
+        <div class="mx-auto">
+          <%= link "Login", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.user_session_path(@conn, :new) %>
+        </div>
+        <div class="mx-auto">
+          <%= link "Register", class: "text-yellow-300 hover:text-yellow-600 transition duration-300 ease-in-out mb-4", to: Routes.user_registration_path(@conn, :new) %>
+        </div>
+      <% end %>
     </div>
+
+    <%= @inner_content %>
   </body>
 </html>
