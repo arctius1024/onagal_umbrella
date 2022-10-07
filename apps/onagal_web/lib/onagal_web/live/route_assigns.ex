@@ -4,14 +4,32 @@ defmodule OnagalWeb.RouteAssigns do
 
   def on_mount(:default, _params, _session, socket) do
     socket =
-      assign(socket,
-        menus: [
+      socket
+      |> assign(
+        :main_menus,
+        [
           {"Images", Routes.gallery_index_path(socket, :index)},
           {"Tags", Routes.tag_index_path(socket, :index)},
           {"Tagsets", Routes.tagset_index_path(socket, :index)},
           {"Filtersets", Routes.filterset_index_path(socket, :index)}
         ]
       )
+      |> assign(
+        :logged_in_menus,
+        [
+          {"Settings", Routes.user_settings_path(socket, :edit)},
+          {"Dashboard", Routes.live_dashboard_path(socket, :home)}
+        ]
+      )
+      |> assign(
+        :logged_out_menus,
+        [
+          {"Login", Routes.user_session_path(socket, :new)},
+          {"Register", Routes.user_registration_path(socket, :new)}
+        ]
+      )
+
+    IO.inspect(socket.assigns)
 
     {:cont,
      socket
