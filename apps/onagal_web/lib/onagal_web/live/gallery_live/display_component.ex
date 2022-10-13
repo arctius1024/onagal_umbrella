@@ -43,19 +43,19 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
     ~H"""
     <div class="container px-5 py-2 mx-auto lg:pt-8 lg:px-32">
       <%= if @prev_image.id != @image.id do %>
-        <td><%= live_patch "Prev", to: Routes.gallery_index_path(@socket, :show, @prev_image.id) %></td>
+        <td><.link patch={Routes.gallery_index_path(@socket, :show, @prev_image.id)}>Prev</.link></td>
       <% else %>
         <td>Prev</td>
       <% end %>
       <%= if @next_image.id != @image.id do %>
-        <td><%= live_patch "Next", to: Routes.gallery_index_path(@socket, :show, @next_image.id) %></td>
+        <td><.link patch={Routes.gallery_index_path(@socket, :show, @next_image.id)}>Next</.link></td>
       <% else %>
         <td>Next</td>
       <% end %>
 
-      <%= live_patch to: Routes.gallery_index_path(@socket, :index) do %>
+      <.link patch={Routes.gallery_index_path(@socket, :index)}>
         <img src={Routes.static_path(@socket, Images.web_image_path(@image))} style="width: 25vw; min-width: 320px;">
-      <% end %>
+      </.link>
 
       <%= for image_tag <- list_tags_as_options(@image.tags) do %>
         <li><%= image_tag %></li>

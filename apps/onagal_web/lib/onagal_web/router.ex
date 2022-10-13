@@ -106,17 +106,30 @@ defmodule OnagalWeb.Router do
     end
   end
 
+  # scope "/admin/settings", OnagalWeb do
+  #   pipe_through([:browser, :require_authenticated_user])
+  #   #      live_session :admin_settings, on_mount: OnagalWeb.RouteAssigns do
+  #   live("/filters", AdminSettingsLive.Index, :filters)
+  #   live("/tagsets", AdminSettingsLive.Index, :tagsets)
+  #   #      end
+
+  #   scope "/tags", OnagalWeb do
+  #     live "/", AdminSettingsLive.TagLive.Index, :index
+  #     live "/new", AdminSettingsLive.TagLive.Index, :new
+  #     live "/:id/edit", AdminSettingsLive.TagLive.Index, :edit
+
+  #     live "/:id", AdminSettingsLive.TagLive.Show, :show
+  #     live "/:id/show/edit", AdminSettingsLive.TagLive.Show, :edit
+  #   end
+  # end
+
   scope "/tags", OnagalWeb do
-    pipe_through([:browser, :require_authenticated_user])
+    live "/", TagLive.Index, :index
+    live "/new", TagLive.Index, :new
+    live "/:id/edit", TagLive.Index, :edit
 
-    live_session :tags, on_mount: OnagalWeb.RouteAssigns do
-      live "/", TagLive.Index, :index
-      live "/new", TagLive.Index, :new
-      live "/:id/edit", TagLive.Index, :edit
-
-      live "/:id", TagLive.Show, :show
-      live "/:id/show/edit", TagLive.Show, :edit
-    end
+    live "/:id", TagLive.Show, :show
+    live "/:id/show/edit", TagLive.Show, :edit
   end
 
   scope "/tagsets", OnagalWeb do
