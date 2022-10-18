@@ -1,6 +1,6 @@
 defmodule OnagalWeb.LiveHelpers do
-  import Phoenix.LiveView
-  import Phoenix.LiveView.Helpers
+  # import Phoenix.LiveView
+  import Phoenix.Component
 
   alias Phoenix.LiveView.JS
 
@@ -24,7 +24,7 @@ defmodule OnagalWeb.LiveHelpers do
       </.modal>
   """
   def modal(assigns) do
-    assigns = assign_new(assigns, :return_to, fn -> nil end)
+    _assigns = assign_new(assigns, :return_to, fn -> nil end)
 
     ~H"""
     <div id="modal" class="phx-modal fade-in" phx-remove={hide_modal()}>
@@ -36,12 +36,14 @@ defmodule OnagalWeb.LiveHelpers do
         phx-key="escape"
       >
         <%= if @return_to do %>
-          <%= live_patch "✖",
-            to: @return_to,
-            id: "close",
-            class: "phx-modal-close",
-            phx_click: hide_modal()
-          %>
+          <.link
+            patch={@return_to}
+            id="close"
+            class="phx-modal-close"
+            phx_click={hide_modal()}
+          >
+            ✖
+          </.link>
         <% else %>
           <a id="close" href="#" class="phx-modal-close" phx-click={hide_modal()}>✖</a>
         <% end %>

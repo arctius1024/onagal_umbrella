@@ -9,17 +9,7 @@
 # move said applications out of the umbrella.
 import Config
 
-config :onagal_simple,
-  ecto_repos: [OnagalSimple.Repo],
-  generators: [context_app: false]
-
 # Configures the endpoint
-config :onagal_simple, OnagalSimple.Endpoint,
-  url: [host: "onagal.thexproject.us"],
-  render_errors: [view: OnagalSimple.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: Onagal.PubSub,
-  live_view: [signing_salt: "aXObZbe9"]
-
 config :onagal_web,
   ecto_repos: [Onagal.Repo],
   generators: [context_app: :onagal]
@@ -30,16 +20,6 @@ config :onagal_web, OnagalWeb.Endpoint,
   render_errors: [view: OnagalWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Onagal.PubSub,
   live_view: [signing_salt: "+hNCe+L+"]
-
-# Configure esbuild (the version is required)
-config :esbuild,
-  version: "0.14.29",
-  default: [
-    args:
-      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
-    cd: Path.expand("../apps/onagal_simple/assets", __DIR__),
-    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
-  ]
 
 # Configure Mix tasks and generators
 config :onagal,
