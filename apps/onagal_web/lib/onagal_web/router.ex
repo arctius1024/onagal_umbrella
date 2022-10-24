@@ -17,6 +17,10 @@ defmodule OnagalWeb.Router do
     plug(:accepts, ["json"])
   end
 
+  pipeline :graphql do
+    # Will be used later
+  end
+
   scope "/", OnagalWeb do
     pipe_through(:browser)
 
@@ -104,6 +108,16 @@ defmodule OnagalWeb.Router do
       # live("/show/:id", GalleryLive.Show, :show)
       # live("/:id/info", GalleryLive.Show, :info)
     end
+  end
+
+  scope "/api" do
+    pipe_through [:graphql, :require_authenticated_user]
+
+    forward "/", Absinthe.Plug, schema: OnagalWeb.Schema
+  end
+
+  if Mix.env() == :dev do
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: OnagalWeb.Schema
   end
 
   # scope "/admin/settings", OnagalWeb do

@@ -45,6 +45,8 @@ defmodule OnagalWeb.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.7"},
       {:phoenix_live_session, "~> 0.1"},
+      {:absinthe, "~> 1.5"},
+      {:absinthe_plug, "~> 1.5"},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},

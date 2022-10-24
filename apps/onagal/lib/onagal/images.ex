@@ -175,6 +175,12 @@ defmodule Onagal.Images do
     Image.ui_edit_changeset(image, attrs)
   end
 
+  def ui_update_image(%Image{} = image, attrs \\ %{}) do
+    image
+    |> Image.ui_edit_changeset(attrs)
+    |> Repo.update()
+  end
+
   def update_image(%Image{} = image, attrs) do
     image
     |> Image.changeset(attrs)
