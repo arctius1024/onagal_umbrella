@@ -42,24 +42,29 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
 
     ~H"""
     <div class="container px-5 py-2 mx-auto lg:pt-8 lg:px-32">
-      <%= if @prev_image.id != @image.id do %>
-        <td><.link patch={Routes.gallery_index_path(@socket, :show, @prev_image.id)}>Prev</.link></td>
-      <% else %>
-        <td>Prev</td>
-      <% end %>
-      <%= if @next_image.id != @image.id do %>
-        <td><.link patch={Routes.gallery_index_path(@socket, :show, @next_image.id)}>Next</.link></td>
-      <% else %>
-        <td>Next</td>
-      <% end %>
+      <td>
+        <.link :if={@prev_image.id != @image.id} patch={Routes.gallery_index_path(@socket, :show, @prev_image.id)}>
+          Prev
+        </.link>
+      </td>
+
+      <td>
+        |
+      </td>
+
+      <td>
+        <.link :if={@next_image.id != @image.id} patch={Routes.gallery_index_path(@socket, :show, @next_image.id)}>
+          Next
+        </.link>
+      </td>
 
       <.link patch={Routes.gallery_index_path(@socket, :index)}>
         <img src={Routes.static_path(@socket, Images.web_image_path(@image))} style="width: 25vw; min-width: 320px;">
       </.link>
 
-      <%= for image_tag <- list_tags_as_options(@image.tags) do %>
-        <li><%= image_tag %></li>
-      <% end %>
+      <li :for={image_tag <- list_tags_as_options(@image.tags)} >
+        <%= image_tag %>
+      </li>
     </div>
     """
   end
