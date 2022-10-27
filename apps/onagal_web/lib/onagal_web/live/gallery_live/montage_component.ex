@@ -33,17 +33,21 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
         <ul class="flex list-style-none">
           <li :if={@images.page_number > 1} class="page-item">
             <.link patch={Routes.gallery_index_path(@socket, :index, page: @images.page_number - 1)}
-                    class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none"
+                    class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
+                           transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
+                           bg-green-400"
             >
-              &lt;&lt; Prev Page
+              <div class="text-white font-bold">&lt;&lt; Prev Page</div>
             </.link>
           </li>
 
           <li :if={@images.page_number < @images.total_pages} class="page-item">
             <.link patch={Routes.gallery_index_path(@socket, :index, page: @images.page_number + 1)}
-                    class="page-link relative block py-1.5 px-3 rounded border-0 bg-transparent outline-none transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none"
+                    class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
+                           transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
+                           bg-green-400"
             >
-              Next Page &gt;&gt;
+            <div class="text-white font-bold">Next Page &gt;&gt;</div>
             </.link>
           </li>
         </ul>
@@ -54,30 +58,33 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
 
   def gallery_image(assigns) do
     ~H"""
-        <.link
-          patch={Routes.gallery_index_path(@socket, :show, @image)}
-        >
-          <img id={"image-#{@image.id}"}
-            class={image_is_selected(@selected_images, @image)}
-            src={thumbnail_for_image(@image)}
-            alt={@image.original_name}>
-        </.link>
-
+      <div class="p-1">
+          <.link
+            patch={Routes.gallery_index_path(@socket, :show, @image)}
+          >
+            <img id={"image-#{@image.id}"}
+              class="p1 block object-scale-down h-120 w-120 rounded-lg border-2 border-black"
+              src={thumbnail_for_image(@image)}
+              alt={@image.original_name}>
+          </.link>
+      </div>
+      <div class="">
           <button
             type="button"
             phx-click="select_image"
             value={@image.id}
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+            class={image_is_selected(@selected_images, @image)}
           >
             Select
           </button>
+      </div>
     """
   end
 
   defp image_is_selected(images, image) do
     if Enum.any?(images, fn x -> x == image.id end),
-      do: "block object-scale-down h-120 w-120 rounded-lg border-2 border-red-500",
-      else: "block object-scale-down h-120 w-120 rounded-lg border-2 border-black"
+      do: "bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 m-1 rounded w-1/2",
+      else: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 m-1 rounded w-1/2"
   end
 
   defp thumbnail_for_image(image) do
