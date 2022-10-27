@@ -47,7 +47,7 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
                            transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
                            bg-green-400"
             >
-            <div class="text-white font-bold">Next Page &gt;&gt;</div>
+              <div class="text-white font-bold">Next Page &gt;&gt;</div>
             </.link>
           </li>
         </ul>

@@ -41,30 +41,41 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
     IO.puts("show render")
 
     ~H"""
-    <div class="container px-5 py-2 mx-auto lg:pt-8 lg:px-32">
-      <td>
-        <.link :if={@prev_image.id != @image.id} patch={Routes.gallery_index_path(@socket, :show, @prev_image.id)}>
-          Prev
-        </.link>
-      </td>
+    <div class="container px-3 py-2 mx-auto lg:pt-8 lg:px-16">
+      <ul class="flex list-style-none">
+        <li>
+          <.link :if={@prev_image.id != @image.id} patch={Routes.gallery_index_path(@socket, :show, @prev_image.id)}
+            class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
+                    transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
+                    bg-green-400">
+              <div class="text-white font-bold">Prev</div>
+          </.link>
+        </li>
 
-      <td>
-        |
-      </td>
-
-      <td>
-        <.link :if={@next_image.id != @image.id} patch={Routes.gallery_index_path(@socket, :show, @next_image.id)}>
-          Next
-        </.link>
-      </td>
+        <li>
+          <.link :if={@next_image.id != @image.id} patch={Routes.gallery_index_path(@socket, :show, @next_image.id)}
+            class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
+                    transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
+                    bg-green-400">
+          <div class="text-white font-bold">Next</div>
+          </.link>
+        </li>
+      </ul>
 
       <.link patch={Routes.gallery_index_path(@socket, :index)}>
         <img src={Routes.static_path(@socket, Images.web_image_path(@image))} style="width: 25vw; min-width: 320px;">
       </.link>
 
-      <li :for={image_tag <- list_tags_as_options(@image.tags)} >
-        <%= image_tag %>
-      </li>
+      <div class="p-1">
+        <span>Tags: </span>
+
+        <ul>
+          <li :for={image_tag <- list_tags_as_options(@image.tags)}
+            class="text-orange-700">
+            <%= image_tag %>
+          </li>
+        </ul>
+      </div>
     </div>
     """
   end
