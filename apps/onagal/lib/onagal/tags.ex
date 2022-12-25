@@ -44,6 +44,13 @@ defmodule Onagal.Tags do
     Repo.delete(tag)
   end
 
+  def get_tag_ids_by_name(tag_names) when is_list(tag_names) do
+    Tag
+    |> where([tag], tag.name in ^tag_names)
+    |> select([tag], tag.id)
+    |> Repo.all()
+  end
+
   def list_tags_by_id(tag_ids) do
     Tag
     |> where([tag], tag.id in ^tag_ids)
