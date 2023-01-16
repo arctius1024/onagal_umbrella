@@ -31,8 +31,8 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
 
       <div class="flex justify-center">
         <ul class="flex list-style-none">
-          <li :if={@images.page_number > 1} class="page-item">
-            <.link patch={Routes.gallery_index_path(@socket, :index, page: @images.page_number - 1)}
+          <li :if={@images.metadata.before} class="page-item">
+            <.link patch={Routes.gallery_index_path(@socket, :index, page: :prev)}
                     class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
                            transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
                            bg-green-400"
@@ -41,8 +41,8 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
             </.link>
           </li>
 
-          <li :if={@images.page_number < @images.total_pages} class="page-item">
-            <.link patch={Routes.gallery_index_path(@socket, :index, page: @images.page_number + 1)}
+          <li :if={@images.metadata.after} class="page-item">
+            <.link patch={Routes.gallery_index_path(@socket, :index, page: :next)}
                     class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
                            transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
                            bg-green-400"

@@ -44,7 +44,7 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
     <div class="container px-3 py-2 mx-auto lg:pt-8 lg:px-16">
       <ul class="flex list-style-none">
         <li>
-          <.link :if={@prev_image.id != @image.id} patch={Routes.gallery_index_path(@socket, :show, @prev_image.id)}
+          <.link :if={@prev_image} patch={Routes.gallery_index_path(@socket, :show, @prev_image.id)}
             class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
                     transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
                     bg-green-400">
@@ -53,7 +53,7 @@ defmodule OnagalWeb.GalleryLive.DisplayComponent do
         </li>
 
         <li>
-          <.link :if={@next_image.id != @image.id} patch={Routes.gallery_index_path(@socket, :show, @next_image.id)}
+          <.link :if={@next_image} patch={Routes.gallery_index_path(@socket, :show, @next_image.id)}
             class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
                     transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
                     bg-green-400">
