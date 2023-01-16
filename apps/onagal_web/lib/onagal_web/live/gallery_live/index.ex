@@ -10,7 +10,7 @@ defmodule OnagalWeb.GalleryLive.Index do
   """
 
   @impl true
-  def mount(_params, session, socket) do
+  def mount(_params, _session, socket) do
     IO.puts("handle_mount")
 
     # selected_filters -> tags currently selected as filters
@@ -22,7 +22,6 @@ defmodule OnagalWeb.GalleryLive.Index do
       |> assign(:selected_tags, [])
       |> assign(:selected_images, [])
       |> assign(:image_tags, [])
-      |> assign(:page, 1)
 
     {:ok, socket}
   end
@@ -33,49 +32,65 @@ defmodule OnagalWeb.GalleryLive.Index do
 
     socket =
       socket
-      |> assign(:page, parse_page(Map.get(params, "page", "1")))
       |> assign(:tag_list, Onagal.Tags.list_tags_as_options())
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :index, params) do
-    IO.puts("apply_action :index")
+  defp apply_action(socket, :index, %{"page" => "prev"} = params) do
+    images = get_socket_images(socket, params)
+    prev_images = get_socket_prev_images(socket, images, params)
+    new_images = images_prev_page(prev_images, socket.assigns.selected_filters, params)
 
-    socket
-    |> assign(:images, list_images(params, socket.assigns.selected_filters))
-    |> assign(:image, nil)
+    socket = assign_images_tuple(socket, {new_images, prev_images, images})
+
+    apply_action(socket, :index, Map.delete(params, "page"))
   end
 
-  defp apply_action(socket, :show, %{"id" => id} = params) do
+  defp apply_action(socket, :index, %{"page" => "next"} = params) do
+    images = get_socket_images(socket, params)
+    next_images = get_socket_next_images(socket, images, params)
+    new_images = images_next_page(next_images, socket.assigns.selected_filters, params)
+
+    socket = assign_images_tuple(socket, {images, next_images, new_images})
+
+    apply_action(socket, :index, Map.delete(params, "page"))
+  end
+
+  defp apply_action(socket, :index, %{} = params) do
+    socket
+    |> assign_new(:images, fn -> list_images(socket.assigns.selected_filters, params) end)
+    |> assign(:image, nil)
+    |> assign(:next_image, nil)
+    |> assign(:prev_image, nil)
+  end
+
+  defp apply_action(socket, :show, params) do
     IO.puts("apply_action :show")
 
-    if !Map.has_key?(socket.assigns, :images) and socket.assigns.page == 1,
-      do: push_patch(socket, to: Routes.gallery_index_path(socket, :index, page: 1)),
-      else: show_action(socket, params, id)
+    if Map.has_key?(socket.assigns, :images),
+      do: show_action(socket, params),
+      else: push_patch(socket, to: Routes.gallery_index_path(socket, :index))
   end
 
-  defp show_action(socket, params, id) do
+  defp show_action(socket, %{"id" => id} = params) do
     image = Images.get_image_with_tags(id)
-    selected_filters = socket.assigns.selected_filters
-    page = Map.get(socket.assigns, :images, list_images(params, selected_filters))
 
-    {prev_image, image, next_image, images} =
-      Paginate.resolve_image_tuples(page, image, params, selected_filters)
+    socket = refresh_image_lists(image, socket, params)
 
     socket
-    |> assign(:next_image, next_image)
-    |> assign(:prev_image, prev_image)
-    |> assign(:images, images)
-    |> assign(:image, image |> Onagal.Repo.preload(:tags))
-    |> assign(:page, images.page_number)
+    |> assign(:image, image)
+    |> assign(:prev_image, get_prev_image(image, socket))
+    |> assign(:next_image, get_next_image(image, socket))
   end
+
+  # Handlers
 
   @impl true
   def handle_info({:selected_filters, [filters: filters, params: params]}, socket) do
     IO.puts("index handle_info :selected_filters")
 
-    images = list_images(Map.merge(params, %{page: 1}), filters)
+    images = list_images(filters, params)
 
     image =
       if images.entries == [],
@@ -196,22 +211,148 @@ defmodule OnagalWeb.GalleryLive.Index do
     socket |> assign(:image, image)
   end
 
-  ####### index helper methods
+  # ####### index helper methods
+  def params_to_paginate(params) do
+    cond do
+      # Deprecated - we now store prev/current/next images and use those directly...
+      # Map.get(params, "next") -> [after: Map.get(params, "next")]
+      # Map.get(params, "prev") -> [before: Map.get(params, "prev")]
+      Map.get(params, "id") -> [id: Map.get(params, "id")]
+      true -> []
+    end
+  end
 
-  @doc """
-    returns a list of paginated images
-    params: pagination config
-    filters: tag filters (%{"tags" => "" | [] })
-  """
-  def list_images(params), do: Images.paginate_images(params)
-  def list_images(params, tags), do: Images.paginate_images(params, tags)
+  defp get_socket_images(socket, params),
+    do: Map.get(socket.assigns, :images, list_images(socket.assigns.selected_filters, params))
 
-  ###### Show helper methods
+  defp get_socket_prev_images(socket, images, params),
+    do:
+      Map.get(
+        socket.assigns,
+        :prev_images,
+        images_prev_page(images, socket.assigns.selected_filters, params)
+      )
+
+  defp get_socket_next_images(socket, images, params),
+    do:
+      Map.get(
+        socket.assigns,
+        :next_images,
+        images_next_page(images, socket.assigns.selected_filters, params)
+      )
+
+  defp assign_images_tuple(socket, {prev_images, images, next_images}) do
+    socket
+    |> assign(:prev_images, prev_images)
+    |> assign(:images, images)
+    |> assign(:next_images, next_images)
+  end
+
+  def refresh_image_lists(image, socket, params) do
+    # Images _must_ be set, if not it should be caught in caller
+    images = Map.get(socket.assigns, :images)
+
+    prev_images =
+      Map.get(
+        socket.assigns,
+        :prev_images,
+        images_prev_page(images, socket.assigns.selected_filters, params)
+      )
+
+    next_images =
+      Map.get(
+        socket.assigns,
+        :next_images,
+        images_next_page(images, socket.assigns.selected_filters, params)
+      )
+
+    cond do
+      Paginate.image_on_current_page(images, image) ->
+        socket
+        |> assign_new(:prev_images, fn -> prev_images end)
+        |> assign_new(:next_images, fn -> next_images end)
+
+      Paginate.image_on_prior_page(images, image) ->
+        socket
+        |> assign(:images, prev_images)
+        |> assign(:next_images, images)
+        |> assign(
+          :prev_images,
+          images_prev_page(prev_images, socket.assigns.selected_filters, params)
+        )
+
+      Paginate.image_on_future_page(images, image) ->
+        socket
+        |> assign(:images, next_images)
+        |> assign(:prev_images, images)
+        |> assign(
+          :next_images,
+          images_next_page(next_images, socket.assigns.selected_filters, params)
+        )
+    end
+  end
+
+  def get_prev_image(image, socket) do
+    images = Map.get(socket.assigns, :images)
+
+    cond do
+      image.id == hd(images.entries).id ->
+        case List.last(Map.get(socket.assigns, :prev_images).entries) do
+          x when x.id > image.id -> nil
+          x -> x
+        end
+
+      true ->
+        image_index = Enum.find_index(images.entries, fn img -> img.id == image.id end)
+        Enum.at(images.entries, image_index - 1)
+    end
+  end
+
+  def get_next_image(image, socket) do
+    images = Map.get(socket.assigns, :images)
+
+    cond do
+      image.id == List.last(images.entries).id ->
+        case hd(Map.get(socket.assigns, :next_images).entries) do
+          x when x.id < image.id -> nil
+          x -> x
+        end
+
+      true ->
+        image_index = Enum.find_index(images.entries, fn img -> img.id == image.id end)
+        Enum.at(images.entries, image_index + 1)
+    end
+  end
+
+  # Paginate wrappers
+  defp list_images(params), do: Paginate.paginate_images([], params_to_paginate(params))
+  defp list_images(%{}, params), do: Paginate.paginate_images([], params_to_paginate(params))
+  defp list_images(tags, params), do: Paginate.paginate_images(tags, params_to_paginate(params))
+
+  defp images_next_page(images, params),
+    do: Paginate.images_next_page(images, [], params.to_paginate(params))
+
+  defp images_next_page(images, %{}, params),
+    do: Paginate.images_next_page(images, [], params_to_paginate(params))
+
+  defp images_next_page(images, tags, params),
+    do: Paginate.images_next_page(images, tags, params_to_paginate(params))
+
+  defp images_prev_page(images, params),
+    do: Paginate.images_prev_page(images, [], params.to_paginate(params))
+
+  defp images_prev_page(images, %{}, params),
+    do: Paginate.images_prev_page(images, [], params_to_paginate(params))
+
+  defp images_prev_page(images, tags, params),
+    do: Paginate.images_prev_page(images, tags, params_to_paginate(params))
+
+  # ###### Show helper methods
   def list_tags_as_options(image_tags) do
     Enum.map(image_tags, fn tag -> tag.name end)
   end
 
-  # generic session helper methods
+  #### generic session helper methods
   def retag_image(image, mode, tags) when is_list(tags) do
     case mode do
       :replace ->
@@ -221,13 +362,6 @@ defmodule OnagalWeb.GalleryLive.Index do
         Enum.each(tags, fn tag ->
           Tags.add_tag_to_image(image, tag)
         end)
-    end
-  end
-
-  defp parse_page(raw_page) do
-    case Integer.parse(raw_page) do
-      {page, _} -> page
-      :error -> 1
     end
   end
 end

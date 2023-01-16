@@ -33,17 +33,27 @@
 - ~~handle filters returning only a single image~~
 - ~~force ordering of paginated image queries~~
 - ~~fix changing filters in show sometimes display incorrect image~~
+- ~~Pages are "wrapping around"~~
+  - ~~Is this a paginator "feature"? If so I hate it~~
+  - ~~Make it not happen.~~
+    - ~~See if something in the page tuple generation can be changed to fix it~~
+  - ~~Make next_images/prev_image nil on end of list boundaries (to stop buttons from showing)~~
+- ~~Massive rewrite on pagination:~~
+  - ~~Switched to Paginator~~
+  - ~~Key based pagination (instead of pages)~~
+  - ~~Inter-page image pagination works!!!!~~
 
 * [*FEATURES*]
 - improve clearing filters
 
 * [*FIXES/CLEANUPS*]
 - Tags aren't selected by default in display view filter control but should be
-  - have the filter prefer image.tags then selected_tags; null out image on montage
+  - have the filter prefer image.tags then selected_tags; ~~null out image on montage~~
 - Fix missing menu errors on main landing page
 - [PARTIAL] cleanup send_*_update functions in GalleryLive/index.ex
 - [PARTIAL] Possible refactor with onagal.images as well
 - Refactoring pass on onagal_fs, its a rats nest in there
+- More pagination fallout cleanup...
 
 * [*STYLING*]
 - Make "tags" displays "pretty" (in tagsets/tags/images)
