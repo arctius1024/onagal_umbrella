@@ -17,9 +17,9 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
 
   def render(assigns) do
     ~H"""
-    <div>
-      <div class="flex flex-row flex-wrap bg-yellow-100">
-        <div :for={image <- @images.entries} class="w-1/6 bg-orange-100 py-1 border-2 border-zinc-400">
+    <div class="w-5/6">
+      <div class="container m-auto grid grid-cols-6 bg-green-100 gap-1">
+        <div :for={image <- @images.entries} class="bg-orange-100 py-1 border-1 border-zinc-400">
           <.gallery_image
             socket={@socket}
             image={image}
@@ -29,28 +29,26 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
         </div>
       </div>
 
-      <div class="flex justify-center">
-        <ul class="flex list-style-none">
-          <li :if={@images.metadata.before} class="page-item">
-            <.link patch={Routes.gallery_index_path(@socket, :index, page: :prev)}
-                    class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
-                           transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
-                           bg-green-400"
-            >
-              <div class="text-white font-bold">&lt;&lt; Prev Page</div>
-            </.link>
-          </li>
+      <div class="container m-auto grid grid-cols-6 bg-green-100 gap-1">
+        <div :if={@images.metadata.before} class="justify-center col-start-3 col-span-1 page-item">
+          <.link patch={Routes.gallery_index_path(@socket, :index, page: :prev)}
+                  class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
+                          transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
+                          bg-green-400"
+          >
+            <div class="col-start-1 col-span-2 text-white font-bold">&lt;&lt; Prev Page</div>
+          </.link>
+        </div>
 
-          <li :if={@images.metadata.after} class="page-item">
-            <.link patch={Routes.gallery_index_path(@socket, :index, page: :next)}
-                    class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
-                           transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
-                           bg-green-400"
-            >
-              <div class="text-white font-bold">Next Page &gt;&gt;</div>
-            </.link>
-          </li>
-        </ul>
+        <div :if={@images.metadata.after} class="justify-center col-start-4 col-span-1 page-item">
+          <.link patch={Routes.gallery_index_path(@socket, :index, page: :next)}
+                  class="page-link relative block m-1 py-1.5 px-3 rounded border-0 outline-none
+                          transition-all duration-300 rounded text-gray-800 hover:text-gray-800 focus:shadow-none
+                          bg-green-400"
+          >
+            <div class="col-start-5 col-span-2 text-white font-bold">Next Page &gt;&gt;</div>
+          </.link>
+        </div>
       </div>
     </div>
     """

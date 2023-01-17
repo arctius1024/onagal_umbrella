@@ -68,6 +68,7 @@ defmodule OnagalWeb.GalleryLive.Index do
   defp apply_action(socket, :show, params) do
     IO.puts("apply_action :show")
 
+    # TODO: Possible change this up if we can do offset starts on pages
     if Map.has_key?(socket.assigns, :images),
       do: show_action(socket, params),
       else: push_patch(socket, to: Routes.gallery_index_path(socket, :index))
