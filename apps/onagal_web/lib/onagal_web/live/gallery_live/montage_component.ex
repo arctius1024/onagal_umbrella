@@ -18,7 +18,7 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
   def render(assigns) do
     ~H"""
     <div class="w-5/6">
-      <div class="container m-auto grid grid-cols-6 bg-green-100 gap-1">
+      <div class="container m-auto grid grid-cols-6 grid-rows-4 bg-green-100 gap-1">
         <div :for={image <- @images.entries} class="bg-orange-100 py-1 border-1 border-zinc-400">
           <.gallery_image
             socket={@socket}

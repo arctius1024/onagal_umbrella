@@ -42,6 +42,8 @@
   - ~~Switched to Paginator~~
   - ~~Key based pagination (instead of pages)~~
   - ~~Inter-page image pagination works!!!!~~
+  - ~~You can now start the gallary at a given image id~~
+    - ~~You cannot back-paginate prior to that id~~
 
 * [*FEATURES*]
 - improve clearing filters
