@@ -56,33 +56,35 @@ defmodule OnagalWeb.GalleryLive.MontageComponent do
 
   def gallery_image(assigns) do
     ~H"""
-      <div class="p-1">
-          <.link
-            patch={Routes.gallery_index_path(@socket, :show, @image)}
-          >
-            <img id={"image-#{@image.id}"}
-              class="p1 block object-scale-down h-120 w-120 rounded-lg border-2 border-black"
-              src={thumbnail_for_image(@image)}
-              alt={@image.original_name}>
-          </.link>
-      </div>
-      <div class="">
-          <button
-            type="button"
-            phx-click="select_image"
-            value={@image.id}
-            class={image_is_selected(@selected_images, @image)}
-          >
-            Select
-          </button>
+      <div class="flex flex-col items-center content-center align-center gap-y-1">
+        <div class="p-1">
+            <.link
+              patch={Routes.gallery_index_path(@socket, :show, @image)}
+            >
+              <img id={"image-#{@image.id}"}
+                class="p1 block object-scale-down h-120 w-120 rounded-lg border-2 border-black"
+                src={thumbnail_for_image(@image)}
+                alt={@image.original_name}>
+            </.link>
+        </div>
+        <div class="">
+            <button
+              type="button"
+              phx-click="select_image"
+              value={@image.id}
+              class={image_is_selected(@selected_images, @image)}
+            >
+              Select
+            </button>
+        </div>
       </div>
     """
   end
 
   defp image_is_selected(images, image) do
     if Enum.any?(images, fn x -> x == image.id end),
-      do: "bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 m-1 rounded w-1/2",
-      else: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 m-1 rounded w-1/2"
+      do: "bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 m-1 rounded",
+      else: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 m-1 rounded"
   end
 
   defp thumbnail_for_image(image) do
