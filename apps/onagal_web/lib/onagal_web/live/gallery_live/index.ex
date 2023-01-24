@@ -218,7 +218,7 @@ defmodule OnagalWeb.GalleryLive.Index do
       # Deprecated - we now store prev/current/next images and use those directly...
       # Map.get(params, "next") -> [after: Map.get(params, "next")]
       # Map.get(params, "prev") -> [before: Map.get(params, "prev")]
-      Map.get(params, "id") -> [id: Map.get(params, "id")]
+      Map.get(params, "id") -> [id: String.to_integer(Map.get(params, "id"))]
       true -> []
     end
   end
