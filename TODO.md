@@ -46,7 +46,15 @@
     - ~~You cannot back-paginate prior to that id~~
 
 * [*FEATURES*]
+- Image tags are not being picked up on :show for pre-selecting in list
+- Devops:
+  - Implement a deployment strategy (elixir? docker?)
+  - Implement a production environment
+  - CI/CD?
 - improve clearing filters
+- RBAC
+  - roles: [ admin, moderator, curator, poster, viewer ]
+  - permissions: [ :view, :upload, :moderate, :manage, :curate ]
 
 * [*FIXES/CLEANUPS*]
 - Tags aren't selected by default in display view filter control but should be
